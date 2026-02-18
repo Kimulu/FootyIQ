@@ -7,8 +7,8 @@ const NAV = [
   { label: "HOME", href: "/" },
   { label: "NEWS", href: "/news" },
   { label: "TIPS", href: "/tips" },
-  { label: "FIXTURES", href: "/fixtures" },
-  { label: "SHOP", href: "/shop" },
+  { label: "CONTACT US", href: "/fixtures" },
+  { label: "ADVERTISE", href: "/shop" },
 ];
 
 function isActive(pathname: string, href: string) {

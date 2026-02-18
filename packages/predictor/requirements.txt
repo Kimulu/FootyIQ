@@ -1,0 +1,4 @@
+soccerdata
+pandas
+scikit-learn
+matplotlib

@@ -46,9 +46,20 @@ export function Button({
       {/* RIGHT ZONE: Arrow (40%) */}
       {/* pr-4 offsets the right slant visually */}
       <div className="flex h-full w-[30%] items-center justify-center pr-4">
-        <span className="text-lg font-black leading-none opacity-90 transition-transform group-hover:translate-x-1">
-          ›
-        </span>
+        <svg
+          className="w-3.5 h-3.5 opacity-90 transition-transform group-hover:translate-x-1"
+          viewBox="0 0 24 24"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M9 18L15 12L9 6"
+            stroke="currentColor"
+            strokeWidth="4"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
       </div>
 
       {/* Glass Reflection (Top Half) */}

@@ -2,6 +2,7 @@ export interface Prediction {
   _id: string;
   homeTeam: string;
   awayTeam: string;
+  competition: string;
   kickoffTime: string;
   prediction: string;
   type: "Free" | "Premium";

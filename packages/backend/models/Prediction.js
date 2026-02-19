@@ -2,16 +2,20 @@ const mongoose = require("mongoose");
 
 const PredictionSchema = new mongoose.Schema(
   {
-    externalId: { type: Number, unique: true, sparse: true }, // ID from the API to prevent duplicates
+    externalId: { type: Number, unique: true, sparse: true },
     homeTeam: { type: String, required: true },
     awayTeam: { type: String, required: true },
     kickoffTime: { type: Date, required: true },
 
-    // Changed: Not required on creation, because the API doesn't know your prediction yet
+    // Ensure this field name matches what we use in Frontend
+    competition: { type: String, required: true },
+
+    // Keep this just in case you want to support the old data format,
+    // but we will try to save to 'competition' from now on.
+    league: { type: String },
+
     prediction: { type: String, default: "Pending Analysis" },
-
-    odds: { type: String, default: "-" }, // Added for your card display
-
+    odds: { type: String, default: "-" },
     type: {
       type: String,
       enum: ["Free", "Premium"],
@@ -22,7 +26,6 @@ const PredictionSchema = new mongoose.Schema(
       enum: ["Upcoming", "Won", "Lost", "Pending"],
       default: "Pending",
     },
-    league: { type: String }, // e.g., "Premier League"
     logoHome: { type: String },
     logoAway: { type: String },
   },

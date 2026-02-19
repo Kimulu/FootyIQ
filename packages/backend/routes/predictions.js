@@ -4,18 +4,21 @@ const Prediction = require("../models/Prediction");
 const router = express.Router();
 
 // GET /api/predictions
-// Returns upcoming matches sorted by date
 router.get("/", async (req, res) => {
   try {
-    // Get current date
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    // DEBUGGING MODE: Fetch ALL games, no date filter.
+    // We sort by kickoffTime (1 = Ascending/Oldest to Newest, -1 = Newest to Oldest)
+    // Let's use -1 for now so you see the most recent data added if they are past dates.
+    const predictions = await Prediction.find()
+      .sort({ kickoffTime: 1 })
+      .limit(20);
 
-    const predictions = await Prediction.find({
-      kickoffTime: { $gte: today }, // Only show future/today's games
-    })
-      .sort({ kickoffTime: 1 }) // Earliest games first
-      .limit(20); // Increased limit since we might have many fixtures
+    console.log(
+      `DEBUG: Sending ${predictions.length} predictions to frontend.`,
+    );
+
+    // Disable caching to force browser to get fresh data
+    res.set("Cache-Control", "no-store");
 
     res.json(predictions);
   } catch (err) {
@@ -25,7 +28,6 @@ router.get("/", async (req, res) => {
 });
 
 // GET /api/predictions/:id
-// Get single prediction details
 router.get("/:id", async (req, res) => {
   try {
     const prediction = await Prediction.findById(req.params.id);

@@ -3,15 +3,18 @@ const mongoose = require("mongoose");
 const dotenv = require("dotenv");
 const cors = require("cors");
 
+// 1. Load Env Vars FIRST
+dotenv.config();
+
+console.log("✅✅✅ --- server.js file loaded successfully! --- ✅✅✅");
+
 // Import routes
 const articleRoutes = require("./routes/articles");
 const newsRoutes = require("./routes/newsRoutes");
 const predictionRoutes = require("./routes/predictions");
-const adminRoutes = require("./routes/admin"); // <-- Import Admin/Sync route
-
-console.log("✅✅✅ --- server.js file loaded successfully! --- ✅✅✅");
-
-dotenv.config();
+const adminRoutes = require("./routes/admin");
+const authRoutes = require("./routes/auth"); // Added explicit import
+const userRoutes = require("./routes/users"); // Added explicit import
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -38,10 +41,11 @@ connectDB();
 app.use("/api/articles", articleRoutes);
 app.use("/api/news", newsRoutes);
 app.use("/api/predictions", predictionRoutes);
-app.use("/api/admin", adminRoutes); // <-- Mount the admin route
+app.use("/api/admin", adminRoutes);
 
-// Keep your seed route if you still need it, otherwise this new admin route replaces it
-// app.use("/api/dev", require("./routes/dev/seedPredictions"));
+// Auth & User Routes
+app.use("/api/auth", authRoutes);
+app.use("/api/users", userRoutes);
 
 // ========== HEARTBEAT ==========
 app.get("/", (req, res) => {

@@ -18,7 +18,7 @@ router.post("/sync-fixtures", async (req, res) => {
     // 1. Fetch matches for specific competitions (PL = Premier League, PD = La Liga, etc.)
     // We request matches scheduled for the next 3 days
     const response = await axios.get(
-      "https://api.football-data.org/v4/matches?competitions=PL,PD,CL,SA,BL1&status=SCHEDULED",
+      "https://api.football-data.org/v4/matches?competitions=PL,PD,CL,SA,BL1,FL1,EL&status=SCHEDULED",
       {
         headers: { "X-Auth-Token": API_KEY },
       },
@@ -34,7 +34,7 @@ router.post("/sync-fixtures", async (req, res) => {
         homeTeam: match.homeTeam.shortName || match.homeTeam.name,
         awayTeam: match.awayTeam.shortName || match.awayTeam.name,
         kickoffTime: match.utcDate,
-        league: match.competition.name,
+        competition: match.competition.name,
         logoHome: match.homeTeam.crest,
         logoAway: match.awayTeam.crest,
         // We do NOT overwrite 'prediction', 'type', or 'odds' if they already exist
@@ -86,6 +86,49 @@ router.put("/update-tip/:id", async (req, res) => {
     res.json(updated);
   } catch (err) {
     res.status(500).json({ message: "Update failed" });
+  }
+});
+
+router.post("/create-match", async (req, res) => {
+  try {
+    const {
+      homeTeam,
+      awayTeam,
+      competition,
+      kickoffTime,
+      prediction,
+      odds,
+      type,
+      status,
+      logoHome, // <--- Extract from body
+      logoAway, // <--- Extract from body
+    } = req.body;
+
+    // Generate a random ID since we don't have an external API ID
+    const manualId = Math.floor(Math.random() * 1000000);
+
+    const newMatch = new Prediction({
+      externalId: manualId,
+      homeTeam,
+      awayTeam,
+      competition: competition || "General",
+      kickoffTime: kickoffTime || new Date(),
+      prediction: prediction || "Pending",
+      odds: odds || "-",
+      type: type || "Free",
+      status: status || "Pending",
+      // Use provided logos OR fallback to generic shield
+      logoHome: logoHome || "https://crests.football-data.org/generic.png",
+      logoAway: logoAway || "https://crests.football-data.org/generic.png",
+    });
+
+    await newMatch.save();
+    res
+      .status(201)
+      .json({ message: "Match created manually!", match: newMatch });
+  } catch (err) {
+    console.error("Manual creation failed:", err);
+    res.status(500).json({ message: "Server Error", error: err.message });
   }
 });
 

@@ -25,4 +25,26 @@ export const apiClient = {
     }
     return res.json();
   },
+
+  // AUTH METHODS
+  async login(credentials: any) {
+    const res = await fetch(`${BASE_URL}/auth/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(credentials),
+    });
+    if (!res.ok) throw new Error("Login failed");
+    return res.json();
+  },
+
+  async register(data: any) {
+    const res = await fetch(`${BASE_URL}/auth/register`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    });
+    const result = await res.json();
+    if (!res.ok) throw new Error(result.message || "Registration failed");
+    return result;
+  },
 };

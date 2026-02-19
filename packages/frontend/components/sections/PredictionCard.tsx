@@ -8,17 +8,15 @@ interface Props {
 export function PredictionCard({ prediction }: Props) {
   const isPremium = prediction.type === "Premium";
 
-  // Specific polygon shape from the Article component
+  // Specific polygon shape
   const buttonShape =
     "polygon(15px 0, 100% 0, calc(100% - 15px) 100%, 0% 100%)";
 
-  // Dynamic colors based on Free vs Premium
+  // Dynamic colors
   const glowColor = isPremium
     ? "shadow-[0_0_15px_rgba(234,88,12,0.15)]"
     : "shadow-[0_0_15px_rgba(16,185,129,0.15)]";
   const badgeColor = isPremium ? "bg-orange-600" : "bg-emerald-600";
-
-  // Button Dynamic Classes
   const btnBgColor = isPremium ? "bg-orange-500" : "bg-[#10b981]";
   const btnTextColor = isPremium ? "text-orange-400" : "text-[#4ade80]";
   const btnDropShadow = isPremium
@@ -27,7 +25,11 @@ export function PredictionCard({ prediction }: Props) {
 
   // Helper to get abbreviated team name
   const getTeamName = (name: string) =>
-    name.length > 10 ? name.substring(0, 3).toUpperCase() : name;
+    name.length > 13 ? name.substring(0, 3).toUpperCase() : name;
+
+  // FIX: Handle Competition Name (Supports 'competition' or 'league' field)
+  const competitionName =
+    prediction.competition || prediction.league || "Upcoming Match";
 
   return (
     <div
@@ -49,20 +51,20 @@ export function PredictionCard({ prediction }: Props) {
 
       {/* Main Content Area */}
       <div className="relative p-5 pt-12 flex-grow flex flex-col justify-between">
-        {/* League / Competition */}
+        {/* --- FIXED COMPETITION NAME --- */}
         <div className="mb-4">
-          <p className="text-[#f59e0b] text-[10px] font-bold uppercase tracking-[0.2em]">
-            {(prediction as any).competition || "Premier League"}
+          <p className="text-[#f59e0b] text-[10px] font-bold uppercase tracking-[0.2em] truncate">
+            {competitionName}
           </p>
         </div>
 
         {/* Teams Row */}
         <div className="flex items-center justify-between mb-6">
-          <div className="flex flex-col items-start">
-            <span className="text-2xl font-bold text-white tracking-wide">
+          <div className="flex flex-col items-start gap-1">
+            <span className="text-xl font-bold text-white tracking-wide leading-tight">
               {getTeamName(prediction.homeTeam)}
             </span>
-            <span className="text-2xl font-bold text-white tracking-wide">
+            <span className="text-xl font-bold text-white tracking-wide leading-tight">
               {getTeamName(prediction.awayTeam)}
             </span>
           </div>
@@ -89,8 +91,8 @@ export function PredictionCard({ prediction }: Props) {
             <div className="mb-2 text-orange-500">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                width="32"
-                height="32"
+                width="24"
+                height="24"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
@@ -144,25 +146,18 @@ export function PredictionCard({ prediction }: Props) {
           className="group relative inline-block transition-transform hover:scale-[1.02] active:scale-95"
         >
           <div
-            // Exact dimensions and classes from your Article component
             className="relative flex h-[32px] min-w-[110px] items-center justify-center text-[9px] font-bold uppercase tracking-widest text-white shadow-lg"
             style={{ clipPath: buttonShape }}
           >
-            {/* Dynamic Background Color */}
             <div className={`absolute inset-0 ${btnBgColor}`} />
-
-            {/* Inner Black Background to create the border effect */}
             <div
               className="absolute inset-[1px] bg-[#0a0f10]"
               style={{ clipPath: buttonShape }}
             />
-
-            {/* Text and Arrow */}
             <span
               className={`z-10 flex items-center gap-2 ${btnTextColor} ${btnDropShadow}`}
             >
               {isPremium ? "Unlock Tip" : "View Analysis"}
-              {/* Exact arrow span from Article component */}
             </span>
           </div>
         </Link>

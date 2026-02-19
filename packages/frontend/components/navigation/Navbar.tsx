@@ -73,7 +73,7 @@ export function Navbar() {
             {/* Right Side */}
             <div className="flex items-center gap-8">
               <Link
-                href="/signin"
+                href="/login"
                 className="hidden text-[13px] font-medium text-white/70 hover:text-white md:inline"
               >
                 Sign In

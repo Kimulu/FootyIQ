@@ -86,6 +86,13 @@ export function Footer() {
             &copy; {new Date().getFullYear()} FootyIQ. All rights reserved.
           </p>
         </div>
+        {/* Inside components/layout/Footer.tsx, under the copyright text */}
+        <div className="mt-2 text-center">
+          <p className="text-[10px] uppercase tracking-widest text-white/20 font-mono">
+            Built with <span className="text-red-500 animate-pulse">❤</span> in
+            Nairobi
+          </p>
+        </div>
       </Container>
     </footer>
   );

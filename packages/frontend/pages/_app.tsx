@@ -6,14 +6,15 @@ import { Toaster } from "sonner";
 export default function App({ Component, pageProps }: AppProps) {
   return (
     <AuthProvider>
-      <Component {...pageProps} />
+      <div className="min-h-screen bg-[#050505]">
+        <Component {...pageProps} />
+      </div>
       <Toaster
-        position="top-right" // Comes from right
-        duration={6000} // 6 Seconds (Slower)
+        position="top-right"
+        duration={6000}
         expand={false}
         closeButton
         visibleToasts={3}
-        // We remove styling here to handle it fully in CSS for better animation control
       />
     </AuthProvider>
   );

@@ -32,7 +32,7 @@ export function PredictionSection() {
   }, []);
 
   return (
-    <section className="bg-[#050505] py-12 min-h-[400px]">
+    <section id="match-tips" className="bg-[#050505] py-12 min-h-[400px]">
       <Container>
         {/* Header Section */}
         <div className="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-4">

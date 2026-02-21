@@ -47,7 +47,10 @@ export default function ArticleCarousel() {
   }, []);
 
   return (
-    <section className="relative z-20 w-full bg-[#050505] pt-5 text-white">
+    <section
+      id="latest-news"
+      className="relative z-20 w-full bg-[#050505] pt-5 text-white"
+    >
       <Container>
         <h2 className="text-3xl font-bold text-white mb-2">Latest News</h2>
         <Carousel

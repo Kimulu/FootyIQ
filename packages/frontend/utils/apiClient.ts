@@ -5,7 +5,7 @@ const BASE_URL = process.env.NEXT_PUBLIC_API_URL as string;
 
 export const apiClient = {
   getArticles: async (): Promise<Article[]> => {
-    const res = await fetch(`${BASE_URL}/api/news`, {
+    const res = await fetch(`${BASE_URL}/news`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -19,7 +19,7 @@ export const apiClient = {
   },
 
   getPredictions: async (): Promise<Prediction[]> => {
-    const res = await fetch(`${BASE_URL}/api/predictions`);
+    const res = await fetch(`${BASE_URL}/predictions`);
     if (!res.ok) {
       throw new Error("Failed to fetch predictions");
     }

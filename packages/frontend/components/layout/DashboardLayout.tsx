@@ -20,6 +20,7 @@ import {
   MessageSquare,
   Users,
   Menu,
+  BookOpen,
 } from "lucide-react";
 
 interface Props {
@@ -32,82 +33,117 @@ export function DashboardLayout({ children, role }: Props) {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const USER_MENU = [
+  // ── Core tip-focused links — what users come here for ─────────────
+  const USER_CORE = [
     { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-    { label: "Match Tips", href: "/predictions", icon: Trophy },
+    { label: "Match Tips", href: "/dashboard/predictions", icon: Trophy },
+    { label: "My Bets", href: "/dashboard/my-bets", icon: BookOpen },
     { label: "News & Analysis", href: "/news", icon: Newspaper },
     { label: "Accumulators", href: "/dashboard/accumulators", icon: Layers },
-    { label: "Artificial Intelligence", href: "/dashboard/ai", icon: Bot },
+    { label: "AI Predictions", href: "/dashboard/ai", icon: Bot },
+  ];
+
+  // ── Secondary links — tucked below a divider, quietly available ───
+  const USER_SECONDARY = [
     { label: "Profile", href: "/dashboard/profile", icon: User },
+    { label: "Community", href: "/dashboard/community", icon: Users },
     { label: "Settings", href: "/dashboard/settings", icon: Settings },
   ];
 
   const ADMIN_MENU = [
     { label: "Overview", href: "/admin/dashboard", icon: LayoutDashboard },
     { label: "Articles", href: "/admin/articles", icon: Newspaper },
-    { label: "Match Tips", href: "/admin/add-match", icon: Trophy },
+    { label: "Match Tips", href: "/admin/matches", icon: Trophy },
     { label: "Sources", href: "/admin/sources", icon: LinkIcon },
     { label: "Users", href: "/admin/users", icon: Users },
     { label: "Settings", href: "/admin/settings", icon: Settings },
   ];
 
-  const menuItems = role === "admin" ? ADMIN_MENU : USER_MENU;
+  const NavLink = ({
+    href,
+    label,
+    icon: Icon,
+  }: {
+    href: string;
+    label: string;
+    icon: any;
+  }) => {
+    const isActive = pathname === href;
+    return (
+      <Link
+        href={href}
+        className={`flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all group ${
+          isActive
+            ? "bg-orange-600/10 text-orange-500 border-l-2 border-orange-500"
+            : "text-white/50 hover:bg-white/5 hover:text-white"
+        }`}
+      >
+        <Icon
+          className={`w-4 h-4 flex-shrink-0 ${
+            isActive
+              ? "text-orange-500"
+              : "text-white/30 group-hover:text-white transition-colors"
+          }`}
+        />
+        {label}
+      </Link>
+    );
+  };
 
   return (
     <div className="min-h-screen bg-[#050505] flex">
-      {/* ── SIDEBAR — desktop only ── */}
+      {/* ── SIDEBAR — desktop ── */}
       <aside className="hidden md:flex w-64 border-r border-white/5 bg-[#0a0a0a] flex-col fixed h-full z-20">
         {/* Logo */}
-        <div className="h-24 flex items-center justify-center border-b border-white/5">
+        <div className="h-20 flex items-center justify-center border-b border-white/5 px-6">
           <Link href="/" className="hover:opacity-80 transition-opacity">
             <img
               src="/images/logo.png"
               alt="FootyIQ"
-              className="h-12 w-auto object-contain"
+              className="h-10 w-auto object-contain"
             />
           </Link>
         </div>
 
-        {/* Menu Items */}
-        <nav className="flex-1 py-8 px-4 space-y-2 overflow-y-auto">
-          {menuItems.map((item) => {
-            const isActive = pathname === item.href;
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all group ${
-                  isActive
-                    ? "bg-orange-600/10 text-orange-500 border-l-2 border-orange-500"
-                    : "text-white/60 hover:bg-white/5 hover:text-white"
-                }`}
-              >
-                <item.icon
-                  className={`w-5 h-5 ${isActive ? "text-orange-500" : "text-white/40 group-hover:text-white transition-colors"}`}
-                />
-                {item.label}
-              </Link>
-            );
-          })}
+        {/* Navigation */}
+        <nav className="flex-1 py-6 px-4 overflow-y-auto flex flex-col gap-1">
+          {role === "admin" ? (
+            ADMIN_MENU.map((item) => <NavLink key={item.href} {...item} />)
+          ) : (
+            <>
+              {/* Core links */}
+              {USER_CORE.map((item) => (
+                <NavLink key={item.href} {...item} />
+              ))}
+
+              {/* Divider — visually separates tips from community */}
+              <div className="my-3 border-t border-white/5" />
+
+              {/* Secondary links — present but not prominent */}
+              {USER_SECONDARY.map((item) => (
+                <NavLink key={item.href} {...item} />
+              ))}
+            </>
+          )}
         </nav>
 
         {/* Logout */}
         <div className="p-4 border-t border-white/5">
           <button
             onClick={logout}
-            className="flex w-full items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-white/40 hover:text-red-400 hover:bg-red-500/5 transition-colors"
+            className="flex w-full items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-white/30 hover:text-red-400 hover:bg-red-500/5 transition-colors"
           >
-            <LogOut className="w-5 h-5" />
+            <LogOut className="w-4 h-4" />
             Sign Out
           </button>
         </div>
       </aside>
 
-      {/* ── MAIN CONTENT ── */}
+      {/* ── MAIN ── */}
       <main className="flex-1 md:ml-64">
-        {/* Top Header */}
+        {/* Header */}
         <header className="h-16 md:h-20 border-b border-white/5 flex items-center justify-between px-4 md:px-8 bg-[#050505]/80 backdrop-blur-md sticky top-0 z-10">
-          {/* Mobile: hamburger + logo */}
+          {/* Mobile: burger + logo */}
           <div className="flex items-center gap-4 md:hidden">
             <button
               onClick={() => setMobileMenuOpen(true)}
@@ -124,7 +160,7 @@ export function DashboardLayout({ children, role }: Props) {
             </Link>
           </div>
 
-          {/* Desktop: search bar */}
+          {/* Desktop: search */}
           <div className="relative w-96 hidden md:block">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40" />
             <input
@@ -134,7 +170,7 @@ export function DashboardLayout({ children, role }: Props) {
             />
           </div>
 
-          {/* Right Actions */}
+          {/* Right */}
           <div className="flex items-center gap-4 md:gap-6">
             <button className="text-white/60 hover:text-white transition-colors relative">
               <Bell className="w-5 h-5" />
@@ -153,18 +189,20 @@ export function DashboardLayout({ children, role }: Props) {
                   {role === "admin" ? "Administrator" : "Pro User"}
                 </p>
               </div>
-              <div className="w-9 h-9 md:w-10 md:h-10 rounded-full bg-gradient-to-br from-orange-600 to-orange-800 flex items-center justify-center text-white font-bold shadow-lg border border-white/10 text-sm">
-                {user?.username?.charAt(0).toUpperCase() || "U"}
-              </div>
+              <Link href="/dashboard/profile">
+                <div className="w-9 h-9 md:w-10 md:h-10 rounded-full bg-gradient-to-br from-orange-600 to-orange-800 flex items-center justify-center text-white font-bold shadow-lg border border-white/10 text-sm cursor-pointer hover:opacity-80 transition-opacity">
+                  {user?.username?.charAt(0).toUpperCase() || "U"}
+                </div>
+              </Link>
             </div>
           </div>
         </header>
 
-        {/* Page Content */}
+        {/* Content */}
         <div className="p-4 md:p-8">{children}</div>
       </main>
 
-      {/* ── MOBILE NAVBAR DRAWER ── */}
+      {/* Mobile drawer */}
       <MobileNavbar
         isOpen={mobileMenuOpen}
         onClose={() => setMobileMenuOpen(false)}

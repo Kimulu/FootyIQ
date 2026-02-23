@@ -9,6 +9,7 @@ interface AuthContextType {
   token: string | null;
   login: (data: any) => Promise<void>;
   logout: () => void;
+  refreshUser: () => Promise<void>; // <--- Added this
   isLoading: boolean;
 }
 
@@ -56,6 +57,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  // NEW FUNCTION: Updates user data (bankroll) without logging in again
+  const refreshUser = async () => {
+    try {
+      if (!token) return; // Don't refresh if not logged in
+
+      const freshUserData = await apiClient.getProfile();
+
+      // Merge new data with existing token (since profile endpoint might not return token)
+      const updatedUser = { ...freshUserData, token };
+
+      setUser(updatedUser);
+      localStorage.setItem("user", JSON.stringify(updatedUser));
+    } catch (err) {
+      console.error("Failed to refresh user data", err);
+    }
+  };
+
   const logout = () => {
     setUser(null);
     setToken(null);
@@ -65,7 +83,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, login, logout, isLoading }}>
+    <AuthContext.Provider
+      value={{ user, token, login, logout, refreshUser, isLoading }}
+    >
       {children}
     </AuthContext.Provider>
   );

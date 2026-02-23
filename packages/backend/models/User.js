@@ -12,14 +12,12 @@ const UserSchema = new mongoose.Schema(
     },
     password: { type: String, required: true },
 
-    // Role: 'user' is a standard client, 'admin' manages content/predictions
     role: {
       type: String,
       enum: ["user", "admin"],
       default: "user",
     },
 
-    // Subscription Status for Premium Tips
     subscription: {
       plan: {
         type: String,
@@ -29,16 +27,26 @@ const UserSchema = new mongoose.Schema(
       status: {
         type: String,
         enum: ["active", "expired", "cancelled"],
-        default: "active", // Defaults to active (for free plan)
+        default: "active",
       },
-      expiresAt: { type: Date, default: null }, // Null means never expires (Free tier)
+      expiresAt: { type: Date, default: null },
     },
 
-    // Important for M-Pesa payments later
     phoneNumber: { type: String, trim: true },
-
-    // Optional profile picture
     avatar: { type: String, default: "" },
+
+    // ── Bankroll Tracker ──────────────────────────────
+    bankroll: {
+      amount: { type: Number, default: 0 }, // Current bankroll in KSh
+      initialAmount: { type: Number, default: 0 }, // Starting bankroll (for ROI calc)
+      isSet: { type: Boolean, default: false }, // Has the user set their bankroll?
+      updatedAt: { type: Date, default: null },
+    },
+
+    // ── Gamification ─────────────────────────────────
+    points: { type: Number, default: 0 }, // Total points for leaderboard
+    streak: { type: Number, default: 0 }, // Daily login streak
+    lastLoginDate: { type: Date, default: null }, // For streak tracking
   },
   { timestamps: true },
 );

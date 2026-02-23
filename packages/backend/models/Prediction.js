@@ -28,6 +28,7 @@ const PredictionSchema = new mongoose.Schema(
     },
     logoHome: { type: String },
     logoAway: { type: String },
+    isTipOfDay: { type: Boolean, default: false },
   },
   { timestamps: true },
 );

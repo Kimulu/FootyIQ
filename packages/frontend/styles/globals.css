@@ -15,12 +15,15 @@
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0a;
-    --foreground: #ededed;
+    --foreground: #00000000;
   }
 }
 
 body {
   background: var(--background);
+  background-color: #050505;
+  margin: 0;
+  padding: 0;
   color: var(--foreground);
   font-family:
     "Space Grotesk",
@@ -30,4 +33,30 @@ body {
     Roboto,
     Arial,
     sans-serif;
+}
+
+/* Add to globals.css */
+
+/* ── Dark scrollbar — all scrollable areas ── */
+* {
+  scrollbar-width: thin; /* Firefox */
+  scrollbar-color: #1f1f1f #0a0a0a; /* Firefox: thumb track */
+}
+
+/* Chrome / Edge / Safari */
+*::-webkit-scrollbar {
+  width: 4px;
+}
+
+*::-webkit-scrollbar-track {
+  background: #0a0a0a;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: #1f1f1f;
+  border-radius: 99px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: #2a2a2a;
 }

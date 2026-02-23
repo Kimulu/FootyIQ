@@ -131,7 +131,7 @@ export function PredictionCard({ prediction }: Props) {
               <div className="text-right">
                 <span className="flex items-center gap-1 text-emerald-400 text-xs font-bold uppercase">
                   <span className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
-                  Pending
+                  {(prediction as any).status || "Pending"}
                 </span>
               </div>
             </div>

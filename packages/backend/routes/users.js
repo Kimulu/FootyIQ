@@ -7,7 +7,6 @@ const bcrypt = require("bcryptjs");
 const verifyToken = (req, res, next) => {
   const authHeader = req.headers.token || req.headers.authorization;
   if (authHeader) {
-    // Supports "Bearer [token]" or just "[token]"
     const token = authHeader.includes(" ")
       ? authHeader.split(" ")[1]
       : authHeader;
@@ -46,9 +45,7 @@ router.put("/profile", verifyToken, async (req, res) => {
 
     const updatedUser = await User.findByIdAndUpdate(
       req.user.id,
-      {
-        $set: req.body,
-      },
+      { $set: req.body },
       { new: true },
     ).select("-password");
 
@@ -59,7 +56,25 @@ router.put("/profile", verifyToken, async (req, res) => {
 });
 
 // ==========================================
-// 3. ADMIN: GET ALL USERS
+// 3. LEADERBOARD
+// ⚠️ Must be before GET "/" to avoid route conflicts
+// ==========================================
+router.get("/leaderboard", verifyToken, async (req, res) => {
+  try {
+    const leaders = await User.find({ points: { $gt: 0 } })
+      .select("username points bankroll createdAt")
+      .sort({ points: -1 })
+      .limit(50);
+
+    res.json(leaders);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// ==========================================
+// 4. ADMIN: GET ALL USERS
 // ==========================================
 router.get("/", verifyToken, async (req, res) => {
   if (req.user.role !== "admin") return res.status(403).json("Access Denied");

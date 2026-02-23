@@ -1,10 +1,43 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
+import { ResolveBetButton } from "@/components/dashboard/ResolveBetButton";
+import { apiClient } from "@/utils/apiClient";
+import { Prediction } from "@/types/Prediction";
 import { Newspaper, Trophy, Users, MoreHorizontal } from "lucide-react";
 
+// Extend Prediction locally to include all possible statuses from the backend
+type PredictionWithStatus = Prediction & {
+  status: "Upcoming" | "Won" | "Lost" | "Pending" | "Void";
+};
+
 export default function AdminDashboard() {
+  const [predictions, setPredictions] = useState<PredictionWithStatus[]>([]);
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const data = await apiClient.getPredictions();
+        setPredictions(data as PredictionWithStatus[]);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    load();
+  }, []);
+
+  const handleResolved = (predictionId: string, result: string) => {
+    setPredictions((prev) =>
+      prev.map((p) =>
+        p._id === predictionId
+          ? { ...p, status: result as PredictionWithStatus["status"] }
+          : p,
+      ),
+    );
+  };
+
   return (
     <ProtectedRoute allowedRoles={["admin"]}>
       <DashboardLayout role="admin">
@@ -34,6 +67,116 @@ export default function AdminDashboard() {
               color="text-emerald-500"
               hasProgress
             />
+          </div>
+        </div>
+
+        {/* Predictions Table with Resolve */}
+        <div className="bg-[#0a0a0a] border border-white/5 rounded-xl overflow-hidden min-h-[400px] w-full max-w-full">
+          {/* Tabs */}
+          <div className="flex items-center border-b border-white/5 px-4 md:px-6 overflow-x-auto scrollbar-none">
+            <button className="py-4 px-2 text-sm font-bold text-orange-500 border-b-2 border-orange-500 whitespace-nowrap">
+              Match Tips
+            </button>
+            <button className="py-4 px-4 md:px-6 text-sm font-medium text-white/50 hover:text-white whitespace-nowrap">
+              Recent Articles
+            </button>
+            <button className="py-4 px-4 md:px-6 text-sm font-medium text-white/50 hover:text-white whitespace-nowrap">
+              Recent Subscribers
+            </button>
+            <div className="ml-auto pl-4 flex-shrink-0">
+              <button className="text-xs text-white/40 hover:text-white whitespace-nowrap">
+                View All ›
+              </button>
+            </div>
+          </div>
+
+          {/* Table */}
+          <div className="w-full overflow-x-auto">
+            <table className="w-full min-w-[600px] text-left border-collapse">
+              <thead>
+                <tr className="text-xs text-white/40 uppercase tracking-wider border-b border-white/5">
+                  <th className="p-4 md:p-6 font-medium">Match</th>
+                  <th className="p-4 md:p-6 font-medium hidden sm:table-cell">
+                    Tip
+                  </th>
+                  <th className="p-4 md:p-6 font-medium hidden sm:table-cell">
+                    Competition
+                  </th>
+                  <th className="p-4 md:p-6 font-medium">Result</th>
+                  <th className="p-4 md:p-6 font-medium text-right">
+                    <MoreHorizontal className="w-5 h-5 ml-auto" />
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="text-sm">
+                {predictions.length === 0 ? (
+                  <tr>
+                    <td
+                      colSpan={5}
+                      className="p-8 text-center text-white/30 text-sm"
+                    >
+                      No predictions found
+                    </td>
+                  </tr>
+                ) : (
+                  predictions.map((pred) => (
+                    <tr
+                      key={pred._id}
+                      className="border-b border-white/5 hover:bg-white/5 transition-colors group"
+                    >
+                      {/* Match */}
+                      <td className="p-4 md:p-6">
+                        <div className="flex items-center gap-2">
+                          <img
+                            src={pred.logoHome || "/logos/default.png"}
+                            className="w-5 h-5 object-contain"
+                          />
+                          <span className="text-white font-medium text-xs">
+                            {pred.homeTeam} vs {pred.awayTeam}
+                          </span>
+                          <img
+                            src={pred.logoAway || "/logos/default.png"}
+                            className="w-5 h-5 object-contain"
+                          />
+                        </div>
+                      </td>
+
+                      {/* Tip */}
+                      <td className="p-4 md:p-6 hidden sm:table-cell">
+                        <span className="text-orange-400 text-xs font-bold">
+                          {pred.prediction}
+                        </span>
+                      </td>
+
+                      {/* Competition */}
+                      <td className="p-4 md:p-6 hidden sm:table-cell">
+                        <span className="px-2 py-1 bg-white/5 rounded text-white/60 text-xs">
+                          {pred.competition}
+                        </span>
+                      </td>
+
+                      {/* Resolve */}
+                      <td className="p-4 md:p-6">
+                        <ResolveBetButton
+                          predictionId={pred._id}
+                          currentStatus={pred.status || "Pending"}
+                          homeTeam={pred.homeTeam}
+                          awayTeam={pred.awayTeam}
+                          onResolved={(result) =>
+                            handleResolved(pred._id, result)
+                          }
+                        />
+                      </td>
+
+                      {/* Actions */}
+                      <td className="p-4 md:p-6 text-right text-white/40 group-hover:text-white cursor-pointer">
+                        ...
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
           </div>
         </div>
       </DashboardLayout>

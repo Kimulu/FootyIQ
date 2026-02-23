@@ -6,6 +6,8 @@ import {
   X,
   User,
   Settings,
+  Layers,
+  Bot,
   LogOut,
   LayoutDashboard,
   Trophy,
@@ -15,6 +17,7 @@ import {
   Mail,
   ChevronRight,
   Users,
+  BookOpen,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "../ui/Button";
@@ -39,8 +42,11 @@ export function MobileNavbar({ isOpen, onClose }: Props) {
 
   const USER_DASHBOARD_LINKS = [
     { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-    { label: "Match Tips", href: "/predictions", icon: Trophy },
+    { label: "Match Tips", href: "/dashboard/predictions", icon: Trophy },
+    { label: "My Bets", href: "/dashboard/my-bets", icon: BookOpen },
     { label: "News & Analysis", href: "/news", icon: Newspaper },
+    { label: "Accumulators", href: "/dashboard/accumulators", icon: Layers },
+    { label: "AI Predictions", href: "/dashboard/ai", icon: Bot },
     { label: "Profile", href: "/dashboard/profile", icon: User },
     { label: "Settings", href: "/dashboard/settings", icon: Settings },
   ];

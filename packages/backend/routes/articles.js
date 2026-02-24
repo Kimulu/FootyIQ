@@ -5,7 +5,7 @@ const router = express.Router();
 
 router.get("/", async (req, res) => {
   try {
-    const articles = await Article.find().sort({ publishedAt: -1 }).limit(10);
+    const articles = await Article.find().sort({ publishedAt: 1 }).limit(20);
 
     if (!articles || articles.length === 0) {
       return res.status(204).json({ message: "No articles found." });

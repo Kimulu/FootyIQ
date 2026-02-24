@@ -18,7 +18,7 @@ exports.syncNews = async (req, res) => {
     const feed = await parser.parseURL(
       "https://feeds.bbci.co.uk/sport/football/rss.xml",
     );
-    const articles = feed.items?.slice(0, 10) || [];
+    const articles = feed.items?.slice(0, 20) || [];
 
     if (!articles.length) {
       return res
@@ -64,7 +64,7 @@ exports.syncNews = async (req, res) => {
 
 exports.getArticles = async (req, res) => {
   try {
-    const articles = await Article.find().sort({ publishedAt: -1 }).limit(10);
+    const articles = await Article.find().sort({ publishedAt: -1 }).limit(20);
     res.status(200).json(articles);
   } catch (err) {
     console.error("❌ Error fetching articles:", err.message);

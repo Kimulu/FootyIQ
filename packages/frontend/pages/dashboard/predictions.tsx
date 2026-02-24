@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { TrackBetModal } from "@/components/dashboard/TrackBetModal";
@@ -25,7 +25,14 @@ const STATUS_COLORS: Record<string, string> = {
   Pending: "text-blue-400 bg-blue-400/10 border-blue-400/20",
 };
 
-const RESOLVED = ["Won", "Lost", "Void"];
+const RESOLVED = ["Won", "Lost", "Void"] as const;
+type DateFilter = "today" | "tomorrow" | "week" | "all";
+
+function safeDate(value: any): Date | null {
+  if (!value) return null;
+  const d = new Date(value);
+  return isNaN(d.getTime()) ? null : d;
+}
 
 export default function PredictionsPage() {
   const { refreshUser } = useAuth();
@@ -36,6 +43,11 @@ export default function PredictionsPage() {
   const [trackingPrediction, setTrackingPrediction] =
     useState<Prediction | null>(null);
   const [trackedIds, setTrackedIds] = useState<Set<string>>(new Set());
+
+  // Filters
+  const [search, setSearch] = useState("");
+  const [dateFilter, setDateFilter] = useState<DateFilter>("today");
+  const [leagueFilter, setLeagueFilter] = useState<string>("all");
 
   // 1. Load Data
   const loadData = async () => {
@@ -68,6 +80,75 @@ export default function PredictionsPage() {
     loadData();
   }, []);
 
+  const leagues = useMemo(() => {
+    const set = new Set<string>();
+    for (const p of predictions) {
+      const lg = (p.competition || (p as any).league || "").trim();
+      if (lg) set.add(lg);
+    }
+    return Array.from(set).sort((a, b) => a.localeCompare(b));
+  }, [predictions]);
+
+  const filteredPredictions = useMemo(() => {
+    const q = search.trim().toLowerCase();
+
+    const now = new Date();
+    const startOfToday = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate(),
+    );
+    const startOfTomorrow = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate() + 1,
+    );
+    const startOfDayAfter = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate() + 2,
+    );
+    const endOfWeek = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate() + 7,
+    );
+
+    return predictions.filter((p) => {
+      // Search by teams + league
+      const home = (p.homeTeam || "").toLowerCase();
+      const away = (p.awayTeam || "").toLowerCase();
+      const comp = (
+        (p.competition || (p as any).league || "") as string
+      ).toLowerCase();
+
+      const matchesSearch =
+        !q || home.includes(q) || away.includes(q) || comp.includes(q);
+
+      // League filter (uses competition first, falls back to league)
+      const lg = (p.competition || (p as any).league || "").trim();
+      const matchesLeague = leagueFilter === "all" || lg === leagueFilter;
+
+      // Date filter (uses kickoffTime)
+      const kickoff = safeDate((p as any).kickoffTime);
+      let matchesDate = true;
+
+      if (dateFilter !== "all") {
+        if (!kickoff) return false;
+
+        if (dateFilter === "today") {
+          matchesDate = kickoff >= startOfToday && kickoff < startOfTomorrow;
+        } else if (dateFilter === "tomorrow") {
+          matchesDate = kickoff >= startOfTomorrow && kickoff < startOfDayAfter;
+        } else if (dateFilter === "week") {
+          matchesDate = kickoff >= startOfToday && kickoff < endOfWeek;
+        }
+      }
+
+      return matchesSearch && matchesLeague && matchesDate;
+    });
+  }, [predictions, search, leagueFilter, dateFilter]);
+
   return (
     <ProtectedRoute allowedRoles={["user", "admin"]}>
       <DashboardLayout role="user">
@@ -85,16 +166,18 @@ export default function PredictionsPage() {
         <div className="mb-8">
           <h1 className="text-2xl font-bold text-white mb-2">Match Tips</h1>
           <p className="text-white/50 text-sm">
-            Expert analysis and predictions for today's top matches.
+            Expert analysis and predictions for today&apos;s top matches.
           </p>
         </div>
 
-        {/* ── Filters (Placeholder for now) ── */}
+        {/* ── Filters ── */}
         <div className="flex flex-col md:flex-row gap-4 mb-8">
           {/* Search */}
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
             <input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
               type="text"
               placeholder="Search teams or leagues..."
               className="w-full bg-[#0a0a0a] border border-white/10 rounded-lg pl-10 pr-4 py-3 text-sm text-white focus:outline-none focus:border-orange-500/50"
@@ -102,17 +185,49 @@ export default function PredictionsPage() {
           </div>
 
           {/* Date Filter */}
-          <button className="flex items-center gap-2 px-4 py-3 bg-[#0a0a0a] border border-white/10 rounded-lg text-sm text-white/70 hover:text-white transition-colors">
-            <Calendar className="w-4 h-4" />
-            <span>Today</span>
-            <ChevronDown className="w-4 h-4 opacity-50" />
-          </button>
+          <div className="relative">
+            <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40" />
+            <select
+              value={dateFilter}
+              onChange={(e) => setDateFilter(e.target.value as DateFilter)}
+              className="appearance-none pl-10 pr-10 py-3 bg-[#0a0a0a] border border-white/10 rounded-lg text-sm text-white/70 hover:text-white focus:outline-none focus:border-orange-500/50"
+            >
+              <option value="today">Today</option>
+              <option value="tomorrow">Tomorrow</option>
+              <option value="week">Next 7 Days</option>
+              <option value="all">All Dates</option>
+            </select>
+            <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 opacity-50 pointer-events-none" />
+          </div>
 
           {/* League Filter */}
-          <button className="flex items-center gap-2 px-4 py-3 bg-[#0a0a0a] border border-white/10 rounded-lg text-sm text-white/70 hover:text-white transition-colors">
-            <Filter className="w-4 h-4" />
-            <span>All Leagues</span>
-            <ChevronDown className="w-4 h-4 opacity-50" />
+          <div className="relative">
+            <Filter className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40" />
+            <select
+              value={leagueFilter}
+              onChange={(e) => setLeagueFilter(e.target.value)}
+              className="appearance-none pl-10 pr-10 py-3 bg-[#0a0a0a] border border-white/10 rounded-lg text-sm text-white/70 hover:text-white focus:outline-none focus:border-orange-500/50"
+            >
+              <option value="all">All Leagues</option>
+              {leagues.map((lg) => (
+                <option key={lg} value={lg}>
+                  {lg}
+                </option>
+              ))}
+            </select>
+            <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 opacity-50 pointer-events-none" />
+          </div>
+
+          {/* Reset (optional but useful) */}
+          <button
+            onClick={() => {
+              setSearch("");
+              setDateFilter("today");
+              setLeagueFilter("all");
+            }}
+            className="px-4 py-3 bg-[#0a0a0a] border border-white/10 rounded-lg text-sm text-white/70 hover:text-white transition-colors"
+          >
+            Reset
           </button>
         </div>
 
@@ -126,13 +241,15 @@ export default function PredictionsPage() {
               />
             ))}
           </div>
-        ) : predictions.length === 0 ? (
+        ) : filteredPredictions.length === 0 ? (
           <div className="text-center py-20 border border-dashed border-white/10 rounded-xl">
-            <p className="text-white/40">No match tips available right now.</p>
+            <p className="text-white/40">
+              No match tips found for these filters.
+            </p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-20">
-            {predictions.map((pred) => (
+            {filteredPredictions.map((pred) => (
               <MatchTipCard
                 key={pred._id}
                 prediction={pred}
@@ -158,21 +275,12 @@ function MatchTipCard({
   onTrack: () => void;
 }) {
   const isPremium = prediction.type === "Premium";
-  const isResolved = RESOLVED.includes(prediction.status);
+  const isResolved = RESOLVED.includes(prediction.status as any);
   const isTracked = trackedIds.has(prediction._id);
 
   // Helper for status badge color
   const getStatusColor = (status: string) => {
-    switch (status) {
-      case "Won":
-        return "text-emerald-400 bg-emerald-400/10 border-emerald-400/20";
-      case "Lost":
-        return "text-red-400 bg-red-400/10 border-red-400/20";
-      case "Void":
-        return "text-gray-400 bg-gray-400/10 border-gray-400/20";
-      default:
-        return "text-blue-400 bg-blue-400/10 border-blue-400/20";
-    }
+    return STATUS_COLORS[status] || STATUS_COLORS.Upcoming;
   };
 
   return (
@@ -195,15 +303,17 @@ function MatchTipCard({
           >
             {isPremium
               ? "Locked"
-              : prediction.competition || prediction.league || "Match"}
+              : prediction.competition || (prediction as any).league || "Match"}
           </div>
 
           {/* Kickoff Time */}
           <div className="text-[10px] font-bold text-white/30 uppercase tracking-widest">
-            {new Date(prediction.kickoffTime).toLocaleTimeString([], {
-              hour: "2-digit",
-              minute: "2-digit",
-            })}
+            {prediction.kickoffTime
+              ? new Date(prediction.kickoffTime).toLocaleTimeString([], {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })
+              : "--:--"}
           </div>
         </div>
 
@@ -259,7 +369,7 @@ function MatchTipCard({
                   Tip
                 </p>
                 <p className="text-xs font-bold text-white truncate">
-                  {prediction.prediction}
+                  {(prediction as any).prediction}
                 </p>
               </div>
               <div className="bg-white/5 rounded p-2">
@@ -267,7 +377,7 @@ function MatchTipCard({
                   Odds
                 </p>
                 <p className="text-xs font-bold text-orange-400">
-                  {prediction.odds}
+                  {(prediction as any).odds}
                 </p>
               </div>
             </div>
@@ -275,7 +385,9 @@ function MatchTipCard({
             {/* Status & Track Button */}
             <div className="flex items-center gap-2">
               <span
-                className={`flex-shrink-0 px-2 py-1.5 rounded border text-[10px] font-bold uppercase tracking-wider ${getStatusColor(prediction.status || "Upcoming")}`}
+                className={`flex-shrink-0 px-2 py-1.5 rounded border text-[10px] font-bold uppercase tracking-wider ${getStatusColor(
+                  prediction.status || "Upcoming",
+                )}`}
               >
                 {prediction.status || "Upcoming"}
               </span>

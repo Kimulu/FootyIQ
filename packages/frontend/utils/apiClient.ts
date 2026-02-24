@@ -197,4 +197,35 @@ export const apiClient = {
     if (!res.ok) throw new Error(data.message || "Failed to resolve bets");
     return data;
   },
+  // ── ACCUMULATORS ──────────────────────────────────────────────────
+  async getAccumulators() {
+    const res = await fetch(`${BASE_URL}/accumulators`, {
+      headers: authHeaders(),
+    });
+    return res.json();
+  },
+
+  async createAccumulator(data: {
+    title: string;
+    matchIds: string[];
+    totalOdds: string;
+  }) {
+    const res = await fetch(`${BASE_URL}/accumulators`, {
+      method: "POST",
+      headers: authHeaders(),
+      body: JSON.stringify(data),
+    });
+    if (!res.ok) throw new Error("Failed to create accumulator");
+    return res.json();
+  },
+
+  async trackAccumulator(data: { accumulatorId: string; stakeAmount: number }) {
+    const res = await fetch(`${BASE_URL}/accumulators/track`, {
+      method: "POST",
+      headers: authHeaders(),
+      body: JSON.stringify(data),
+    });
+    if (!res.ok) throw new Error("Failed to track accumulator");
+    return res.json();
+  },
 };

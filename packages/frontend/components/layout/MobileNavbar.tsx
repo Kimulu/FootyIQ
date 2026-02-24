@@ -44,7 +44,7 @@ export function MobileNavbar({ isOpen, onClose }: Props) {
     { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
     { label: "Match Tips", href: "/dashboard/predictions", icon: Trophy },
     { label: "My Bets", href: "/dashboard/my-bets", icon: BookOpen },
-    { label: "News & Analysis", href: "/news", icon: Newspaper },
+    { label: "News & Analysis", href: "/dashboard/news", icon: Newspaper },
     { label: "Accumulators", href: "/dashboard/accumulators", icon: Layers },
     { label: "AI Predictions", href: "/dashboard/ai", icon: Bot },
     { label: "Profile", href: "/dashboard/profile", icon: User },
@@ -55,6 +55,7 @@ export function MobileNavbar({ isOpen, onClose }: Props) {
     { label: "Overview", href: "/admin/dashboard", icon: LayoutDashboard },
     { label: "Match Tips", href: "/admin/add-match", icon: Trophy },
     { label: "Articles", href: "/admin/articles", icon: Newspaper },
+    { label: "Accumulators", href: "/admin/accumulators", icon: Layers },
     { label: "Users", href: "/admin/users", icon: Users },
     { label: "Settings", href: "/admin/settings", icon: Settings },
   ];

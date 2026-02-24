@@ -4,12 +4,26 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { apiClient } from "@/utils/apiClient";
 import { toast } from "sonner";
-import { X, TrendingUp, Wallet, Calculator } from "lucide-react";
+import {
+  X,
+  TrendingUp,
+  Wallet,
+  Calculator,
+  Layers,
+  Trophy,
+} from "lucide-react";
 import { Prediction } from "@/types/Prediction";
 
 interface Props {
   isOpen: boolean;
-  prediction: Prediction;
+  // Make prediction optional so we can pass an accumulator instead
+  prediction?: Prediction;
+  // Add optional accumulator prop
+  accumulator?: {
+    _id: string;
+    title: string;
+    totalOdds: string;
+  };
   onClose: () => void;
   onTracked: () => void;
 }
@@ -17,6 +31,7 @@ interface Props {
 export function TrackBetModal({
   isOpen,
   prediction,
+  accumulator,
   onClose,
   onTracked,
 }: Props) {
@@ -25,7 +40,9 @@ export function TrackBetModal({
 
   const QUICK_STAKES = [100, 200, 500, 1000, 2000];
 
-  const odds = parseFloat(prediction.odds || "0");
+  // Determine which odds to use
+  const rawOdds = accumulator ? accumulator.totalOdds : prediction?.odds;
+  const odds = parseFloat(rawOdds || "0");
 
   const potentialReturn =
     parseFloat(stakeAmount) > 0 && odds > 0
@@ -45,17 +62,31 @@ export function TrackBetModal({
 
     setLoading(true);
     try {
-      await apiClient.trackBet({
-        predictionId: prediction._id,
-        stakeAmount: parsed,
-        oddsAtBet: prediction.odds,
-        tipType: prediction.type,
-      });
+      if (accumulator) {
+        // ── TRACK ACCUMULATOR ──────────────────────────────────────
+        await apiClient.trackAccumulator({
+          accumulatorId: accumulator._id,
+          stakeAmount: parsed,
+        });
 
-      toast.success("Bet tracked!", {
-        description: `KSh ${parsed.toLocaleString()} on ${prediction.homeTeam} vs ${prediction.awayTeam}`,
-        style: { borderLeft: "4px solid #f97316" },
-      });
+        toast.success("Accumulator tracked!", {
+          description: `KSh ${parsed.toLocaleString()} on ${accumulator.title}`,
+          style: { borderLeft: "4px solid #f97316" },
+        });
+      } else if (prediction) {
+        // ── TRACK SINGLE BET ───────────────────────────────────────
+        await apiClient.trackBet({
+          predictionId: prediction._id,
+          stakeAmount: parsed,
+          oddsAtBet: prediction.odds,
+          tipType: prediction.type,
+        });
+
+        toast.success("Bet tracked!", {
+          description: `KSh ${parsed.toLocaleString()} on ${prediction.homeTeam} vs ${prediction.awayTeam}`,
+          style: { borderLeft: "4px solid #f97316" },
+        });
+      }
 
       onTracked();
       onClose();
@@ -98,7 +129,7 @@ export function TrackBetModal({
                     </div>
                     <div>
                       <h2 className="text-white font-black text-lg tracking-tight">
-                        Track This Bet
+                        {accumulator ? "Track Accumulator" : "Track This Bet"}
                       </h2>
                       <p className="text-white/40 text-xs">
                         Log your stake to track your ROI
@@ -116,40 +147,68 @@ export function TrackBetModal({
 
               {/* Body */}
               <div className="p-6 space-y-5">
-                {/* Match info */}
-                <div className="flex items-center justify-between p-4 rounded-xl bg-white/5 border border-white/5">
-                  <div className="flex items-center gap-2">
-                    <img
-                      src={prediction.logoHome || "/logos/default.png"}
-                      className="w-6 h-6 object-contain"
-                    />
-                    <span className="text-white font-bold text-sm">
-                      {prediction.homeTeam.substring(0, 3).toUpperCase()}
-                    </span>
-                  </div>
-
-                  <div className="text-center">
-                    <div className="text-[10px] text-white/30 uppercase tracking-widest mb-1">
-                      Tip
+                {/* ── CARD INFO SECTION ── */}
+                {accumulator ? (
+                  // ACCUMULATOR VIEW
+                  <div className="flex items-center gap-4 p-4 rounded-xl bg-white/5 border border-white/5">
+                    <div className="w-12 h-12 rounded-lg bg-white/5 flex items-center justify-center">
+                      <Layers className="w-6 h-6 text-white/30" />
                     </div>
-                    <div className="text-orange-400 font-bold text-xs px-3 py-1 bg-orange-500/10 rounded-lg">
-                      {prediction.prediction}
+                    <div>
+                      <div className="text-[10px] text-white/30 uppercase tracking-widest mb-1">
+                        Bundle
+                      </div>
+                      <div className="text-white font-bold text-sm">
+                        {accumulator.title}
+                      </div>
+                    </div>
+                    <div className="ml-auto text-right">
+                      <div className="text-[10px] text-white/30 uppercase tracking-widest mb-1">
+                        Total Odds
+                      </div>
+                      <div className="text-orange-400 font-bold text-lg bg-orange-500/10 px-2 py-0.5 rounded">
+                        {accumulator.totalOdds}
+                      </div>
                     </div>
                   </div>
+                ) : prediction ? (
+                  // SINGLE MATCH VIEW
+                  <div className="flex items-center justify-between p-4 rounded-xl bg-white/5 border border-white/5">
+                    <div className="flex items-center gap-2">
+                      <img
+                        src={prediction.logoHome || "/logos/default.png"}
+                        className="w-6 h-6 object-contain"
+                        alt="Home"
+                      />
+                      <span className="text-white font-bold text-sm">
+                        {prediction.homeTeam.substring(0, 3).toUpperCase()}
+                      </span>
+                    </div>
 
-                  <div className="flex items-center gap-2">
-                    <span className="text-white font-bold text-sm">
-                      {prediction.awayTeam.substring(0, 3).toUpperCase()}
-                    </span>
-                    <img
-                      src={prediction.logoAway || "/logos/default.png"}
-                      className="w-6 h-6 object-contain"
-                    />
+                    <div className="text-center">
+                      <div className="text-[10px] text-white/30 uppercase tracking-widest mb-1">
+                        Tip
+                      </div>
+                      <div className="text-orange-400 font-bold text-xs px-3 py-1 bg-orange-500/10 rounded-lg">
+                        {prediction.prediction}
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <span className="text-white font-bold text-sm">
+                        {prediction.awayTeam.substring(0, 3).toUpperCase()}
+                      </span>
+                      <img
+                        src={prediction.logoAway || "/logos/default.png"}
+                        className="w-6 h-6 object-contain"
+                        alt="Away"
+                      />
+                    </div>
                   </div>
-                </div>
+                ) : null}
 
-                {/* Odds display — read only */}
-                {prediction.odds && prediction.odds !== "-" && (
+                {/* Odds display (Only for Single - Acca shows it above) */}
+                {prediction && prediction.odds && prediction.odds !== "-" && (
                   <div className="flex items-center justify-between px-4 py-3 rounded-lg bg-white/5 border border-white/5">
                     <span className="text-xs text-white/40 uppercase tracking-widest">
                       Odds

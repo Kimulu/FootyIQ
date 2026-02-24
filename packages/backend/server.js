@@ -13,9 +13,10 @@ const articleRoutes = require("./routes/articles");
 const newsRoutes = require("./routes/newsRoutes");
 const predictionRoutes = require("./routes/predictions");
 const adminRoutes = require("./routes/adminRoutes");
-const authRoutes = require("./routes/auth"); // Added explicit import
+const authRoutes = require("./routes/auth");
 const userRoutes = require("./routes/users");
 const betslipRoutes = require("./routes/betslipRoutes");
+const accumulatorRoutes = require("./routes/accumulators"); // <--- NEW IMPORT
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -44,6 +45,7 @@ app.use("/api/news", newsRoutes);
 app.use("/api/predictions", predictionRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/betslips", betslipRoutes);
+app.use("/api/accumulators", accumulatorRoutes); // <--- NEW ROUTE
 
 // Auth & User Routes
 app.use("/api/auth", authRoutes);

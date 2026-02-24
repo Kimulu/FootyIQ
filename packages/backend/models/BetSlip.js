@@ -8,10 +8,18 @@ const BetSlipSchema = new mongoose.Schema(
       required: true,
     },
 
+    // OPTIONAL: Can be a single match
     prediction: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Prediction",
-      required: true,
+      required: false,
+    },
+
+    // OPTIONAL: Can be an accumulator
+    accumulator: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Accumulator",
+      required: false,
     },
 
     matchSnapshot: {
@@ -20,6 +28,7 @@ const BetSlipSchema = new mongoose.Schema(
       tip: { type: String },
       competition: { type: String },
       kickoffTime: { type: Date },
+      title: { type: String },
     },
 
     stakeAmount: { type: Number, required: true },
@@ -45,13 +54,30 @@ const BetSlipSchema = new mongoose.Schema(
   { timestamps: true },
 );
 
-// Fixed: use async pre-save hook instead of next() callback
+// ── THE FIX IS HERE ───────────────────────────────────────────────
+// Use async function. Do NOT pass 'next'.
 BetSlipSchema.pre("save", async function () {
+  // 1. Validation
+  if (!this.prediction && !this.accumulator) {
+    throw new Error(
+      "BetSlip must be linked to either a Prediction or an Accumulator.",
+    );
+  }
+
+  // 2. Calculation
   const odds = parseFloat(this.oddsAtBet);
   if (!isNaN(odds) && odds > 0) {
     this.potentialReturn = parseFloat((this.stakeAmount * odds).toFixed(2));
+  } else {
+    this.potentialReturn = 0;
   }
+
+  // No need to call next(). If we don't throw an error, it proceeds automatically.
 });
 
-module.exports =
-  mongoose.models.BetSlip || mongoose.model("BetSlip", BetSlipSchema);
+// Force deletion of model cache to ensure this new schema loads
+if (mongoose.models.BetSlip) {
+  delete mongoose.models.BetSlip;
+}
+
+module.exports = mongoose.model("BetSlip", BetSlipSchema);

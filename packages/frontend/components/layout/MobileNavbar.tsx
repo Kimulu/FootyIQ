@@ -105,9 +105,19 @@ export function MobileNavbar({ isOpen, onClose }: Props) {
               {/* Profile Section (only if logged in) */}
               {isAuthenticated && user && (
                 <div className="mb-8 p-4 rounded-xl bg-white/5 border border-white/5 flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-orange-600 to-orange-800 flex items-center justify-center text-white font-bold text-lg shadow-lg">
-                    {user.username.charAt(0).toUpperCase()}
+                  {/* ── AVATAR (Updated) ── */}
+                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-orange-600 to-orange-800 flex items-center justify-center text-white font-bold text-lg shadow-lg overflow-hidden">
+                    {(user as any)?.avatar ? (
+                      <img
+                        src={(user as any).avatar}
+                        alt={user.username}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      user.username.charAt(0).toUpperCase()
+                    )}
                   </div>
+
                   <div className="flex-1 min-w-0">
                     <p className="text-white font-bold truncate">
                       {user.username}

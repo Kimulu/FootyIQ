@@ -117,10 +117,10 @@ export function DashboardLayout({ children, role }: Props) {
                 <NavLink key={item.href} {...item} />
               ))}
 
-              {/* Divider — visually separates tips from community */}
+              {/* Divider */}
               <div className="my-3 border-t border-white/5" />
 
-              {/* Secondary links — present but not prominent */}
+              {/* Secondary links */}
               {USER_SECONDARY.map((item) => (
                 <NavLink key={item.href} {...item} />
               ))}
@@ -191,8 +191,17 @@ export function DashboardLayout({ children, role }: Props) {
                 </p>
               </div>
               <Link href="/dashboard/profile">
-                <div className="w-9 h-9 md:w-10 md:h-10 rounded-full bg-gradient-to-br from-orange-600 to-orange-800 flex items-center justify-center text-white font-bold shadow-lg border border-white/10 text-sm cursor-pointer hover:opacity-80 transition-opacity">
-                  {user?.username?.charAt(0).toUpperCase() || "U"}
+                {/* ── AVATAR (Updated) ── */}
+                <div className="w-9 h-9 md:w-10 md:h-10 rounded-full bg-gradient-to-br from-orange-600 to-orange-800 flex items-center justify-center text-white font-bold shadow-lg border border-white/10 text-sm cursor-pointer hover:opacity-80 transition-opacity overflow-hidden">
+                  {(user as any)?.avatar ? (
+                    <img
+                      src={(user as any).avatar}
+                      alt={user?.username}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    user?.username?.charAt(0).toUpperCase() || "U"
+                  )}
                 </div>
               </Link>
             </div>

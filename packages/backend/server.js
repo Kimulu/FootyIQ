@@ -16,7 +16,8 @@ const adminRoutes = require("./routes/adminRoutes");
 const authRoutes = require("./routes/auth");
 const userRoutes = require("./routes/users");
 const betslipRoutes = require("./routes/betslipRoutes");
-const accumulatorRoutes = require("./routes/accumulators"); // <--- NEW IMPORT
+const accumulatorRoutes = require("./routes/accumulators");
+const aiRoutes = require("./routes/aiRoutes");
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -45,7 +46,8 @@ app.use("/api/news", newsRoutes);
 app.use("/api/predictions", predictionRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/betslips", betslipRoutes);
-app.use("/api/accumulators", accumulatorRoutes); // <--- NEW ROUTE
+app.use("/api/accumulators", accumulatorRoutes);
+app.use("/api/ai", aiRoutes);
 
 // Auth & User Routes
 app.use("/api/auth", authRoutes);

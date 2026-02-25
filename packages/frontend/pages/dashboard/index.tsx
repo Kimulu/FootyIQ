@@ -366,7 +366,7 @@ export default function UserDashboard() {
               <div className="absolute -bottom-2 left-0 w-1/2 h-0.5 bg-orange-500" />
             </h2>
             <Link
-              href="/predictions"
+              href="/dashboard/predictions"
               className="text-xs font-bold text-orange-500 uppercase tracking-widest border border-orange-500/30 px-4 py-2 rounded hover:bg-orange-500/10"
             >
               View All Tips

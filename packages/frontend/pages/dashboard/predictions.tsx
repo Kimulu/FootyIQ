@@ -46,7 +46,7 @@ export default function PredictionsPage() {
 
   // Filters
   const [search, setSearch] = useState("");
-  const [dateFilter, setDateFilter] = useState<DateFilter>("today");
+  const [dateFilter, setDateFilter] = useState<DateFilter>("all");
   const [leagueFilter, setLeagueFilter] = useState<string>("all");
 
   // 1. Load Data

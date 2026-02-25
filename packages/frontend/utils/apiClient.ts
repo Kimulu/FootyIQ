@@ -228,4 +228,45 @@ export const apiClient = {
     if (!res.ok) throw new Error("Failed to track accumulator");
     return res.json();
   },
+  // ... inside apiClient object ...
+
+  // ── AI PREDICTIONS ────────────────────────────────────────────────
+  async getAiPredictions() {
+    const res = await fetch(`${BASE_URL}/ai`, {
+      method: "GET",
+      headers: authHeaders(), // Optional if you want it public
+    });
+    if (!res.ok) throw new Error("Failed to fetch AI predictions");
+    return res.json();
+  },
+  // ── USER SETTINGS ─────────────────────────────────────────────────
+  async updateProfile(data: any) {
+    const res = await fetch(`${BASE_URL}/users/profile`, {
+      method: "PUT",
+      headers: authHeaders(),
+      body: JSON.stringify(data),
+    });
+    if (!res.ok) throw new Error("Failed to update profile");
+    return res.json();
+  },
+
+  async changePassword(data: any) {
+    const res = await fetch(`${BASE_URL}/users/change-password`, {
+      method: "PUT",
+      headers: authHeaders(),
+      body: JSON.stringify(data),
+    });
+    const result = await res.json();
+    if (!res.ok) throw new Error(result.message || "Failed to change password");
+    return result;
+  },
+
+  async deleteAccount() {
+    const res = await fetch(`${BASE_URL}/users/me`, {
+      method: "DELETE",
+      headers: authHeaders(),
+    });
+    if (!res.ok) throw new Error("Failed to delete account");
+    return res.json();
+  },
 };

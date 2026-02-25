@@ -6,6 +6,7 @@ import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { apiClient } from "@/utils/apiClient";
 import { useAuth } from "@/context/AuthContext";
 import { motion } from "framer-motion";
+import Link from "next/link"; // Added Link for Edit Profile button
 import {
   Wallet,
   TrendingUp,
@@ -16,6 +17,8 @@ import {
   Calendar,
   ShieldCheck,
   Star,
+  MapPin, // Added MapPin
+  Edit, // Added Edit icon
 } from "lucide-react";
 
 interface BetStats {
@@ -30,7 +33,6 @@ interface BetStats {
 }
 
 // ── Badge definitions ──────────────────────────────────────────────
-// Earned silently based on activity — never pushed to the user
 const getBadges = (stats: BetStats, points: number) => {
   const badges = [];
 
@@ -77,7 +79,7 @@ const getBadges = (stats: BetStats, points: number) => {
       earned: true,
     });
 
-  // Unearned — shown greyed out so user knows what to aim for without it being pushed
+  // Unearned
   if (stats.total < 10)
     badges.push({
       label: "10 Bets",
@@ -139,64 +141,98 @@ export default function ProfilePage() {
   return (
     <ProtectedRoute allowedRoles={["user", "admin"]}>
       <DashboardLayout role="user">
-        {/* ── Profile Header ── */}
-        <div className="flex items-start gap-6 mb-10 flex-wrap">
-          {/* Avatar */}
-          <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-orange-600 to-orange-800 flex items-center justify-center text-white font-black text-3xl border border-white/10 shadow-xl flex-shrink-0">
-            {user?.username?.charAt(0).toUpperCase() || "U"}
+        {/* ── NEW: Profile Visual Header (Banner + Avatar) ── */}
+        <div className="relative mb-12">
+          {/* Banner Image */}
+          <div className="h-48 md:h-64 w-full rounded-2xl overflow-hidden bg-[#151515] relative">
+            {(user as any)?.banner ? (
+              <img
+                src={(user as any).banner}
+                alt="Banner"
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <div className="w-full h-full bg-gradient-to-r from-orange-900/40 to-[#0a0a0a]" />
+            )}
+
+            {/* Edit Button overlay on banner */}
+            <Link
+              href="/dashboard/settings"
+              className="absolute top-4 right-4 bg-black/50 hover:bg-black/70 text-white px-4 py-2 rounded-lg text-xs font-bold backdrop-blur-md transition-all flex items-center gap-2"
+            >
+              <Edit className="w-3 h-3" /> Edit Profile
+            </Link>
           </div>
 
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-3 flex-wrap mb-1">
-              <h1 className="text-2xl font-black text-white">
-                {user?.username}
-              </h1>
-              {/* Subscription badge */}
-              <span
-                className={`px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest border ${
-                  (user as any)?.subscription?.plan === "yearly" ||
-                  (user as any)?.subscription?.plan === "monthly"
-                    ? "bg-orange-500/10 text-orange-400 border-orange-500/20"
-                    : "bg-white/5 text-white/40 border-white/10"
-                }`}
-              >
-                {(user as any)?.subscription?.plan === "free"
-                  ? "Free Plan"
-                  : "Premium"}
-              </span>
-            </div>
-
-            {/* Meta info */}
-            <div className="flex items-center gap-4 flex-wrap">
-              {user?.email && (
-                <div className="flex items-center gap-1.5 text-white/40 text-xs">
-                  <Mail className="w-3 h-3" />
-                  {user.email}
-                </div>
-              )}
-              {(user as any)?.phoneNumber && (
-                <div className="flex items-center gap-1.5 text-white/40 text-xs">
-                  <Phone className="w-3 h-3" />
-                  {(user as any).phoneNumber}
-                </div>
-              )}
-              {joinDate && (
-                <div className="flex items-center gap-1.5 text-white/40 text-xs">
-                  <Calendar className="w-3 h-3" />
-                  Member since {joinDate}
-                </div>
-              )}
-            </div>
-
-            {/* Points — shown quietly, not celebrated */}
-            {points > 0 && (
-              <div className="mt-3 flex items-center gap-2">
-                <Star className="w-3.5 h-3.5 text-orange-500/60" />
-                <span className="text-white/40 text-xs">
-                  {points.toLocaleString()} points this month
-                </span>
+          {/* Avatar & Info Wrapper */}
+          <div className="px-6 md:px-10">
+            <div className="flex flex-col md:flex-row items-start gap-6 -mt-12 relative z-10">
+              {/* Avatar (Image or Initials) */}
+              <div className="w-24 h-24 md:w-32 md:h-32 rounded-full border-4 border-[#050505] bg-[#1a1a1a] flex items-center justify-center text-white font-black text-4xl shadow-2xl overflow-hidden">
+                {(user as any)?.avatar ? (
+                  <img
+                    src={(user as any).avatar}
+                    alt={user?.username}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  user?.username?.charAt(0).toUpperCase() || "U"
+                )}
               </div>
-            )}
+
+              {/* User Details */}
+              <div className="flex-1 min-w-0 pt-2 md:pt-14">
+                <div className="flex items-center gap-3 flex-wrap mb-2">
+                  <h1 className="text-3xl font-black text-white">
+                    {user?.username}
+                  </h1>
+                  <span
+                    className={`px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest border ${
+                      (user as any)?.subscription?.plan === "yearly" ||
+                      (user as any)?.subscription?.plan === "monthly"
+                        ? "bg-orange-500/10 text-orange-400 border-orange-500/20"
+                        : "bg-white/5 text-white/40 border-white/10"
+                    }`}
+                  >
+                    {(user as any)?.subscription?.plan === "free"
+                      ? "Free Plan"
+                      : "Premium"}
+                  </span>
+                </div>
+
+                {/* Bio (New) */}
+                {(user as any)?.bio && (
+                  <p className="text-white/60 text-sm mb-4 max-w-2xl leading-relaxed">
+                    {(user as any).bio}
+                  </p>
+                )}
+
+                {/* Meta info row */}
+                <div className="flex items-center gap-6 flex-wrap text-white/40 text-xs font-medium">
+                  {/* Location (New) */}
+                  {(user as any)?.location && (
+                    <div className="flex items-center gap-1.5">
+                      <MapPin className="w-3.5 h-3.5" />
+                      {(user as any).location}
+                    </div>
+                  )}
+
+                  {user?.email && (
+                    <div className="flex items-center gap-1.5">
+                      <Mail className="w-3.5 h-3.5" />
+                      {user.email}
+                    </div>
+                  )}
+
+                  {joinDate && (
+                    <div className="flex items-center gap-1.5">
+                      <Calendar className="w-3.5 h-3.5" />
+                      Joined {joinDate}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 

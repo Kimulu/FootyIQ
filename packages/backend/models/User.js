@@ -34,6 +34,9 @@ const UserSchema = new mongoose.Schema(
 
     phoneNumber: { type: String, trim: true },
     avatar: { type: String, default: "" },
+    banner: { type: String, default: "" }, // Like Twitter header
+    bio: { type: String, default: "" }, // Short description
+    location: { type: String, default: "" },
 
     // ── Bankroll Tracker ──────────────────────────────
     bankroll: {

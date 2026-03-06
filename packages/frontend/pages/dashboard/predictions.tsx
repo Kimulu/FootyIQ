@@ -16,7 +16,7 @@ import {
   BookCheck,
 } from "lucide-react";
 
-// ── STATUS COLORS (Consistent with Dashboard) ──────────────────────
+// ── STATUS COLORS ──────────────────────────────────────────────────
 const STATUS_COLORS: Record<string, string> = {
   Won: "text-emerald-400 bg-emerald-400/10 border-emerald-400/20",
   Lost: "text-red-400 bg-red-400/10 border-red-400/20",
@@ -49,7 +49,6 @@ export default function PredictionsPage() {
   const [dateFilter, setDateFilter] = useState<DateFilter>("all");
   const [leagueFilter, setLeagueFilter] = useState<string>("all");
 
-  // 1. Load Data
   const loadData = async () => {
     setLoading(true);
     try {
@@ -60,7 +59,6 @@ export default function PredictionsPage() {
 
       setPredictions(preds);
 
-      // Build tracked set
       const ids = new Set<string>(
         betsData.betSlips
           .map((b: any) => b.prediction?._id || b.prediction)
@@ -115,7 +113,7 @@ export default function PredictionsPage() {
     );
 
     return predictions.filter((p) => {
-      // Search by teams + league
+      // Search
       const home = (p.homeTeam || "").toLowerCase();
       const away = (p.awayTeam || "").toLowerCase();
       const comp = (
@@ -125,11 +123,11 @@ export default function PredictionsPage() {
       const matchesSearch =
         !q || home.includes(q) || away.includes(q) || comp.includes(q);
 
-      // League filter (uses competition first, falls back to league)
+      // League
       const lg = (p.competition || (p as any).league || "").trim();
       const matchesLeague = leagueFilter === "all" || lg === leagueFilter;
 
-      // Date filter (uses kickoffTime)
+      // Date
       const kickoff = safeDate((p as any).kickoffTime);
       let matchesDate = true;
 
@@ -152,7 +150,6 @@ export default function PredictionsPage() {
   return (
     <ProtectedRoute allowedRoles={["user", "admin"]}>
       <DashboardLayout role="user">
-        {/* ── Modal ── */}
         {trackingPrediction && (
           <TrackBetModal
             isOpen={!!trackingPrediction}
@@ -162,7 +159,6 @@ export default function PredictionsPage() {
           />
         )}
 
-        {/* ── Header Area ── */}
         <div className="mb-8">
           <h1 className="text-2xl font-bold text-white mb-2">Match Tips</h1>
           <p className="text-white/50 text-sm">
@@ -218,7 +214,7 @@ export default function PredictionsPage() {
             <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 opacity-50 pointer-events-none" />
           </div>
 
-          {/* Reset (optional but useful) */}
+          {/* Reset */}
           <button
             onClick={() => {
               setSearch("");
@@ -264,7 +260,7 @@ export default function PredictionsPage() {
   );
 }
 
-// ── Shared Card Component (Similar to Dashboard but tailored for grid) ──
+// ── Shared Card Component ──────────────────────────────────────────
 function MatchTipCard({
   prediction,
   trackedIds,
@@ -278,7 +274,6 @@ function MatchTipCard({
   const isResolved = RESOLVED.includes(prediction.status as any);
   const isTracked = trackedIds.has(prediction._id);
 
-  // Helper for status badge color
   const getStatusColor = (status: string) => {
     return STATUS_COLORS[status] || STATUS_COLORS.Upcoming;
   };
@@ -292,22 +287,24 @@ function MatchTipCard({
       }`}
     >
       <div>
-        {/* Badge */}
-        <div className="flex justify-between items-start mb-6">
+        {/* ── HEADER (FIXED BLEEDING) ── */}
+        <div className="flex justify-between items-start mb-6 gap-2">
+          {/* Badge: Truncate added to prevent bleeding */}
           <div
-            className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
+            className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase truncate max-w-[65%] ${
               isPremium
                 ? "bg-orange-600 text-white"
                 : "bg-[#252525] text-orange-500"
             }`}
+            title={isPremium ? "Locked" : prediction.competition}
           >
             {isPremium
               ? "Locked"
               : prediction.competition || (prediction as any).league || "Match"}
           </div>
 
-          {/* Kickoff Time */}
-          <div className="text-[10px] font-bold text-white/30 uppercase tracking-widest">
+          {/* Kickoff Time: flex-shrink-0 ensures it doesn't get squashed */}
+          <div className="text-[10px] font-bold text-white/30 uppercase tracking-widest flex-shrink-0 pt-0.5">
             {prediction.kickoffTime
               ? new Date(prediction.kickoffTime).toLocaleTimeString([], {
                   hour: "2-digit",
@@ -319,7 +316,7 @@ function MatchTipCard({
 
         {/* Teams */}
         <div className="flex justify-between items-center mb-6">
-          <div className="flex flex-col items-center gap-2">
+          <div className="flex flex-col items-center gap-2 w-[40%]">
             <div className="w-10 h-10 rounded-full bg-white/5 p-1.5 border border-white/5">
               <img
                 src={prediction.logoHome || "/logos/default.png"}
@@ -327,16 +324,16 @@ function MatchTipCard({
                 alt="Home"
               />
             </div>
-            <span className="text-xs font-bold text-white text-center max-w-[80px] leading-tight">
+            <span className="text-xs font-bold text-white text-center leading-tight">
               {prediction.homeTeam}
             </span>
           </div>
 
-          <span className="text-xs text-white/20 font-bold uppercase tracking-widest">
+          <span className="text-xs text-white/20 font-bold uppercase tracking-widest w-[10%] text-center">
             vs
           </span>
 
-          <div className="flex flex-col items-center gap-2">
+          <div className="flex flex-col items-center gap-2 w-[40%]">
             <div className="w-10 h-10 rounded-full bg-white/5 p-1.5 border border-white/5">
               <img
                 src={prediction.logoAway || "/logos/default.png"}
@@ -344,7 +341,7 @@ function MatchTipCard({
                 alt="Away"
               />
             </div>
-            <span className="text-xs font-bold text-white text-center max-w-[80px] leading-tight">
+            <span className="text-xs font-bold text-white text-center leading-tight">
               {prediction.awayTeam}
             </span>
           </div>
@@ -363,12 +360,12 @@ function MatchTipCard({
         ) : (
           <div className="space-y-3">
             {/* Stats Grid */}
-            <div className="grid grid-cols-2 gap-2 text-center">
+            <div className="grid grid-cols-1 gap-1 text-center">
               <div className="bg-white/5 rounded p-2">
                 <p className="text-[10px] text-white/40 uppercase font-bold">
                   Tip
                 </p>
-                <p className="text-xs font-bold text-white truncate">
+                <p className="text-xs font-bold text-white">
                   {(prediction as any).prediction}
                 </p>
               </div>
@@ -392,7 +389,6 @@ function MatchTipCard({
                 {prediction.status || "Upcoming"}
               </span>
 
-              {/* Track Button Logic */}
               {!isResolved &&
                 (isTracked ? (
                   <div className="flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 rounded bg-white/5 border border-white/10">

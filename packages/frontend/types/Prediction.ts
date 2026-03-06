@@ -14,4 +14,5 @@ export interface Prediction {
   updatedAt: string;
   odds?: string;
   isTipOfDay?: boolean;
+  isLocked?: boolean;
 }

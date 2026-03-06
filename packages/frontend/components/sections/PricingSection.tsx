@@ -33,10 +33,9 @@ export function PricingSection() {
             description="Perfect for match-day specific tips."
             accentColor="emerald"
             features={[
-              "Access to Today's Premium Tips",
-              "Basic Match Analysis",
+              "Today's Premium Tips",
               "Single Day Access",
-              "Standard Support",
+              "Basic Support",
             ]}
             buttonText="Get Daily Access"
             icon={<Zap className="w-5 h-5 text-emerald-400" />}
@@ -52,10 +51,9 @@ export function PricingSection() {
             isPopular={true}
             features={[
               "All Daily Premium Tips",
-              "In-Depth Tactical Analysis",
-              "Early Access to Picks",
+              "AI Confidence Scores",
+              "Accumulator Access",
               "Full 30-Day Access",
-              "Priority Support",
             ]}
             buttonText="Get Monthly Access"
           />
@@ -71,10 +69,9 @@ export function PricingSection() {
             isBestValue={true}
             features={[
               "Everything in Monthly",
-              "~2 Months Free (10% Off)",
-              "Exclusive Telegram Channel",
-              "Betting Strategy Guide",
+              "2 Months Free (Save 10%)",
               "VIP Support",
+              "Priority Updates",
             ]}
             buttonText="Get Yearly Access"
           />
@@ -124,7 +121,7 @@ function PricingCard({
     : "group-hover:border-emerald-500/50";
   const checkColor = isOrange ? "text-orange-500" : "text-emerald-500";
 
-  // --- BUTTON STYLES (Copied from PredictionCard) ---
+  // --- BUTTON STYLES ---
   const buttonShape =
     "polygon(15px 0, 100% 0, calc(100% - 15px) 100%, 0% 100%)";
   const btnBgColor = isOrange ? "bg-orange-500" : "bg-[#10b981]";
@@ -203,15 +200,16 @@ function PricingCard({
           ))}
         </ul>
 
-        {/* --- BUTTON SECTION (Using Exact Style) --- */}
+        {/* --- BUTTON SECTION --- */}
         <div className="mt-auto flex justify-center pt-2">
+          {/* Changed link to /signup so new users go to registration first */}
           <Link
-            href="/subscription"
+            href="/signup"
             className="group/btn relative inline-block transition-transform hover:scale-[1.02] active:scale-95"
           >
             <div
               // Using h-[32px] and the exact structure from PredictionCard
-              // Added min-w-[140px] (slightly wider than 110px) to fit "Get Yearly Access" text
+              // Added min-w-[150px] to fit text
               className="relative flex h-[32px] min-w-[150px] items-center justify-center text-[9px] font-bold uppercase tracking-widest text-white shadow-lg"
               style={{ clipPath: buttonShape }}
             >

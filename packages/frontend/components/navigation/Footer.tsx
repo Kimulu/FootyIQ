@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { Container } from "../layout/Container";
-import { Twitter, Facebook, Youtube } from "lucide-react";
 
 export function Footer() {
   return (
@@ -11,9 +10,10 @@ export function Footer() {
       <div className="absolute bottom-0 right-0 w-[600px] h-[300px] bg-orange-600/10 blur-[100px] rounded-full pointer-events-none" />
 
       <Container>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10 mb-16">
+        {/* Changed grid from lg:grid-cols-5 to lg:grid-cols-4 for better spacing since we removed socials */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 mb-16">
           {/* --- Column 1: Brand & Logo --- */}
-          <div className="lg:col-span-2 pr-0 lg:pr-10">
+          <div className="lg:col-span-1 pr-0 lg:pr-10">
             <Link
               href="/"
               className="inline-block mb-6 transition-opacity hover:opacity-80"
@@ -24,33 +24,31 @@ export function Footer() {
                 className="h-12 w-auto object-contain"
               />
             </Link>
-            <p className="text-white/50 text-sm leading-relaxed max-w-sm">
+            <p className="text-white/50 text-sm leading-relaxed">
               Smart football analysis and match tips without the noise. Elevate
               your betting strategy with data-driven insights.
             </p>
           </div>
 
-          {/* --- Column 2: Quick Links --- */}
+          {/* --- Column 2: Explore --- */}
           <div>
-            <h4 className="text-white text-base font-semibold mb-6">
-              Quick Links
-            </h4>
+            <h4 className="text-white text-base font-semibold mb-6">Explore</h4>
             <ul className="space-y-3">
-              <FooterLink href="/news" label="News" />
-              <FooterLink href="/tips" label="Tips" />
-              <FooterLink href="/fixtures" label="Fixtures" />
+              <FooterLink href="/news" label="News & Analysis" />
+              <FooterLink href="/predictions" label="Match Tips" />
+              <FooterLink href="/dashboard/accumulators" label="Accumulators" />
             </ul>
           </div>
 
-          {/* --- Column 3: Resources --- */}
+          {/* --- Column 3: Support --- */}
           <div>
-            <h4 className="text-white text-base font-semibold mb-6">
-              Resources
-            </h4>
+            <h4 className="text-white text-base font-semibold mb-6">Support</h4>
             <ul className="space-y-3">
-              <FooterLink href="/about" label="About Us" />
-              <FooterLink href="/contact" label="Contact" />
-              <FooterLink href="/faq" label="FAQs" />
+              <FooterLink href="/contact" label="Contact Us" />
+              {/* Placeholder for future help center */}
+              <li className="text-white/30 text-sm cursor-not-allowed">
+                Help Center (Coming Soon)
+              </li>
             </ul>
           </div>
 
@@ -60,20 +58,7 @@ export function Footer() {
             <ul className="space-y-3">
               <FooterLink href="/terms" label="Terms of Service" />
               <FooterLink href="/privacy" label="Privacy Policy" />
-              <FooterLink href="/cookies" label="Cookie Policy" />
             </ul>
-          </div>
-
-          {/* --- Column 5: Follow Us --- */}
-          <div className="lg:col-span-1">
-            <h4 className="text-white text-base font-semibold mb-6">
-              Follow Us
-            </h4>
-            <div className="flex items-center gap-4">
-              <SocialLink href="#" icon={<Twitter className="w-5 h-5" />} />
-              <SocialLink href="#" icon={<Facebook className="w-5 h-5" />} />
-              <SocialLink href="#" icon={<Youtube className="w-5 h-5" />} />
-            </div>
           </div>
         </div>
 
@@ -86,7 +71,8 @@ export function Footer() {
             &copy; {new Date().getFullYear()} FootyIQ. All rights reserved.
           </p>
         </div>
-        {/* Inside components/layout/Footer.tsx, under the copyright text */}
+
+        {/* --- Built With Love --- */}
         <div className="mt-2 text-center">
           <p className="text-[10px] uppercase tracking-widest text-white/20 font-mono">
             Built with <span className="text-red-500 animate-pulse">❤</span> in
@@ -110,16 +96,5 @@ function FooterLink({ href, label }: { href: string; label: string }) {
         {label}
       </Link>
     </li>
-  );
-}
-
-function SocialLink({ href, icon }: { href: string; icon: React.ReactNode }) {
-  return (
-    <a
-      href={href}
-      className="flex items-center justify-center w-10 h-10 rounded-full bg-white/5 text-white/60 hover:bg-orange-500 hover:text-white hover:scale-110 transition-all duration-300"
-    >
-      {icon}
-    </a>
   );
 }

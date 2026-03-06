@@ -269,4 +269,39 @@ export const apiClient = {
     if (!res.ok) throw new Error("Failed to delete account");
     return res.json();
   },
+  // ── PAYMENTS ──────────────────────────────────────────────────────
+  async initializePayment(plan: "daily" | "monthly" | "yearly") {
+    const res = await fetch(`${BASE_URL}/payment/initialize`, {
+      method: "POST",
+      headers: authHeaders(),
+      body: JSON.stringify({ plan }),
+    });
+
+    if (!res.ok) throw new Error("Failed to start payment");
+
+    const data = await res.json();
+    return data.authorization_url; // We need this URL to redirect the user
+  },
+
+  async forgotPassword(email: string) {
+    const res = await fetch(`${BASE_URL}/auth/forgot-password`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email }),
+    });
+    return res.json();
+  },
+
+  async resetPassword(data: any) {
+    const res = await fetch(`${BASE_URL}/auth/reset-password`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    });
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.message || "Failed to reset password");
+    }
+    return res.json();
+  },
 };

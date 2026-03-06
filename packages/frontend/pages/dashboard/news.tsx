@@ -158,7 +158,6 @@ export default function NewsPage() {
                       />
                       <span className="z-10 flex items-center gap-2 text-[#4ade80] drop-shadow-[0_0_8px_rgba(74,222,128,0.4)]">
                         Read More
-                        <span className="text-[10px] font-bold">›</span>
                       </span>
                     </div>
                   </Link>

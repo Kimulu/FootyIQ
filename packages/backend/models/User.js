@@ -21,7 +21,7 @@ const UserSchema = new mongoose.Schema(
     subscription: {
       plan: {
         type: String,
-        enum: ["free", "daily", "monthly", "yearly"],
+        enum: ["free", "daily", "monthly", "yearly", "premium"],
         default: "free",
       },
       status: {
@@ -41,7 +41,7 @@ const UserSchema = new mongoose.Schema(
     // ── Bankroll Tracker ──────────────────────────────
     bankroll: {
       amount: { type: Number, default: 0 }, // Current bankroll in KSh
-      initialAmount: { type: Number, default: 0 }, // Starting bankroll (for ROI calc)
+      initialAmount: { type: Number, default: 0 }, // Starting bankroll
       isSet: { type: Boolean, default: false }, // Has the user set their bankroll?
       updatedAt: { type: Date, default: null },
     },
@@ -49,7 +49,11 @@ const UserSchema = new mongoose.Schema(
     // ── Gamification ─────────────────────────────────
     points: { type: Number, default: 0 }, // Total points for leaderboard
     streak: { type: Number, default: 0 }, // Daily login streak
-    lastLoginDate: { type: Date, default: null }, // For streak tracking
+    lastLoginDate: { type: Date, default: null },
+
+    // ── Password Reset ───────────────────────────────
+    resetPasswordToken: { type: String },
+    resetPasswordExpires: { type: Date },
   },
   { timestamps: true },
 );

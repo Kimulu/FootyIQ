@@ -18,6 +18,7 @@ import {
   ChevronRight,
   Users,
   BookOpen,
+  Crown,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "../ui/Button";
@@ -31,6 +32,15 @@ export function MobileNavbar({ isOpen, onClose }: Props) {
   const { user, logout } = useAuth();
   const isAuthenticated = !!user;
   const isAdmin = user?.role === "admin";
+
+  const plan = (user as any)?.subscription?.plan;
+  const isPremium =
+    plan === "premium" || plan === "yearly" || plan === "monthly";
+  const userStatusLabel = isAdmin
+    ? "Administrator"
+    : isPremium
+      ? "Premium"
+      : "Free";
 
   const PUBLIC_LINKS = [
     { label: "Home", href: "/", icon: Home },
@@ -70,7 +80,6 @@ export function MobileNavbar({ isOpen, onClose }: Props) {
     <AnimatePresence>
       {isOpen && (
         <>
-          {/* Backdrop */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -79,7 +88,6 @@ export function MobileNavbar({ isOpen, onClose }: Props) {
             className="fixed inset-0 bg-black/80 backdrop-blur-sm z-40 md:hidden"
           />
 
-          {/* Drawer */}
           <motion.div
             initial={{ x: "100%" }}
             animate={{ x: 0 }}
@@ -87,7 +95,6 @@ export function MobileNavbar({ isOpen, onClose }: Props) {
             transition={{ type: "spring", stiffness: 300, damping: 30 }}
             className="fixed top-0 right-0 bottom-0 w-[85%] max-w-sm bg-[#0a0a0a] border-l border-white/10 z-50 md:hidden flex flex-col"
           >
-            {/* Header */}
             <div className="flex items-center justify-between p-6 border-b border-white/5">
               <span className="text-xl font-extrabold tracking-[0.2em] text-white">
                 {isAdmin ? "ADMIN" : "MENU"}
@@ -100,36 +107,60 @@ export function MobileNavbar({ isOpen, onClose }: Props) {
               </button>
             </div>
 
-            {/* Content */}
             <div className="flex-1 overflow-y-auto p-6">
-              {/* Profile Section (only if logged in) */}
               {isAuthenticated && user && (
-                <div className="mb-8 p-4 rounded-xl bg-white/5 border border-white/5 flex items-center gap-4">
-                  {/* ── AVATAR (Updated) ── */}
-                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-orange-600 to-orange-800 flex items-center justify-center text-white font-bold text-lg shadow-lg overflow-hidden">
-                    {(user as any)?.avatar ? (
-                      <img
-                        src={(user as any).avatar}
-                        alt={user.username}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      user.username.charAt(0).toUpperCase()
-                    )}
+                <div className="mb-8">
+                  <div className="p-4 rounded-xl bg-white/5 border border-white/5 flex items-center gap-4 mb-4">
+                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-orange-600 to-orange-800 flex items-center justify-center text-white font-bold text-lg shadow-lg overflow-hidden flex-shrink-0">
+                      {(user as any)?.avatar ? (
+                        <img
+                          src={(user as any).avatar}
+                          alt={user.username}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        user.username.charAt(0).toUpperCase()
+                      )}
+                    </div>
+
+                    <div className="flex-1 min-w-0">
+                      <p className="text-white font-bold truncate">
+                        {user.username}
+                      </p>
+                      {/* UPDATED STATUS LABEL */}
+                      <p
+                        className={`text-xs font-medium uppercase tracking-wide ${isPremium ? "text-orange-400" : "text-white/50"}`}
+                      >
+                        {userStatusLabel}
+                      </p>
+                    </div>
                   </div>
 
-                  <div className="flex-1 min-w-0">
-                    <p className="text-white font-bold truncate">
-                      {user.username}
-                    </p>
-                    <p className="text-xs text-orange-500 font-medium uppercase tracking-wide">
-                      {isAdmin ? "Administrator" : "Pro User"}
-                    </p>
-                  </div>
+                  {!isAdmin && !isPremium && (
+                    <Link
+                      href="/dashboard/upgrade"
+                      onClick={onClose}
+                      className="flex items-center justify-between p-4 rounded-xl bg-gradient-to-r from-orange-600 to-orange-500 shadow-lg shadow-orange-900/20 group active:scale-95 transition-transform"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="p-1.5 bg-white/20 rounded-full">
+                          <Crown className="w-4 h-4 text-white" />
+                        </div>
+                        <div>
+                          <p className="text-white font-bold text-sm">
+                            Upgrade to Pro
+                          </p>
+                          <p className="text-orange-100 text-[10px]">
+                            Unlock all tips
+                          </p>
+                        </div>
+                      </div>
+                      <ChevronRight className="w-4 h-4 text-white/50 group-hover:text-white" />
+                    </Link>
+                  )}
                 </div>
               )}
 
-              {/* Navigation Links */}
               <div className="space-y-1">
                 {links.map((link) => (
                   <Link
@@ -150,7 +181,6 @@ export function MobileNavbar({ isOpen, onClose }: Props) {
               </div>
             </div>
 
-            {/* Footer Actions */}
             <div className="p-8 border-t border-white/5 bg-[#050505]">
               {!isAuthenticated ? (
                 <div className="flex flex-col gap-6 items-center justify-center w-full">

@@ -1,6 +1,7 @@
 const router = require("express").Router();
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const crypto = require("crypto"); // Built-in Node module for generating tokens
 const User = require("../models/User");
 
 // ==========================================
@@ -10,14 +11,12 @@ router.post("/register", async (req, res) => {
   try {
     const { username, email, password, phoneNumber } = req.body;
 
-    // Basic Validation
     if (!username || !email || !password) {
       return res
         .status(400)
         .json({ message: "Please fill in all required fields" });
     }
 
-    // Check if user exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({ message: "Email already exists" });
@@ -30,10 +29,10 @@ router.post("/register", async (req, res) => {
       email,
       password: hashedPassword,
       phoneNumber: phoneNumber || "",
-      role: "user", // Default role
+      role: "user",
       subscription: {
-        plan: "free", // FIXED: changed "Free" to "free"
-        status: "active", // FIXED: changed "Active" to "active"
+        plan: "free",
+        status: "active",
       },
     });
 
@@ -46,11 +45,10 @@ router.post("/register", async (req, res) => {
 });
 
 // ==========================================
-// 2. ADMIN REGISTRATION (One-time setup usually)
+// 2. ADMIN REGISTRATION
 // ==========================================
 router.post("/register/admin/:secretKey", async (req, res) => {
   const { secretKey } = req.params;
-  // In production, put this in your .env file
   const ADMIN_SECRET = process.env.ADMIN_SECRET || "footy_master_key_2024";
 
   if (secretKey !== ADMIN_SECRET) {
@@ -67,8 +65,8 @@ router.post("/register/admin/:secretKey", async (req, res) => {
       password: hashedPassword,
       role: "admin",
       subscription: {
-        plan: "yearly", // FIXED: changed "Yearly" to "yearly"
-        status: "active", // FIXED: changed "Active" to "active"
+        plan: "yearly",
+        status: "active",
       },
     });
 
@@ -95,7 +93,6 @@ router.post("/login", async (req, res) => {
     );
     if (!validPassword) return res.status(400).json("Wrong password");
 
-    // Create Token containing important info
     const token = jwt.sign(
       {
         id: user._id,
@@ -103,16 +100,98 @@ router.post("/login", async (req, res) => {
         plan: user.subscription.plan,
       },
       process.env.JWT_SECRET,
-      { expiresIn: "7d" }, // Token expires in 7 days
+      { expiresIn: "7d" },
     );
 
-    // Remove password from response
     const { password, ...others } = user._doc;
 
     res.status(200).json({ ...others, token });
   } catch (err) {
     console.error(err);
     res.status(500).json(err);
+  }
+});
+
+// ==========================================
+// 4. FORGOT PASSWORD (Simulated Email)
+// ==========================================
+router.post("/forgot-password", async (req, res) => {
+  try {
+    const { email } = req.body;
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      // Security: Don't reveal if user exists or not
+      return res.json({ message: "If that email exists, we sent a link." });
+    }
+
+    // Generate a generic random token
+    const resetToken = crypto.randomBytes(32).toString("hex");
+
+    // Hash it for database storage (security best practice)
+    const hash = await bcrypt.hash(resetToken, 10);
+
+    // Save to user with 1 hour expiration
+    user.resetPasswordToken = hash;
+    user.resetPasswordExpires = Date.now() + 3600000; // 1 hour
+    await user.save();
+
+    // ── SIMULATED EMAIL SENDING ──
+    // This logs to your VS Code terminal
+    const resetUrl = `http://localhost:3000/reset-password?token=${resetToken}&email=${email}`;
+
+    console.log("\n==================================================");
+    console.log("📧 MOCK EMAIL SERVICE");
+    console.log("--------------------------------------------------");
+    console.log(`To: ${email}`);
+    console.log(`Subject: Password Reset Request`);
+    console.log(`Link: ${resetUrl}`);
+    console.log("==================================================\n");
+
+    res.json({ message: "If that email exists, we sent a link." });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// ==========================================
+// 5. RESET PASSWORD
+// ==========================================
+router.post("/reset-password", async (req, res) => {
+  try {
+    const { email, token, newPassword } = req.body;
+
+    // Find user with matching email AND unexpired token time
+    const user = await User.findOne({
+      email,
+      resetPasswordExpires: { $gt: Date.now() },
+    });
+
+    if (!user) {
+      return res.status(400).json({ message: "Invalid or expired token" });
+    }
+
+    // Verify token matches the hash stored in DB
+    const isValid = await bcrypt.compare(token, user.resetPasswordToken);
+    if (!isValid) {
+      return res.status(400).json({ message: "Invalid or expired token" });
+    }
+
+    // Update password
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    user.password = hashedPassword;
+
+    // Clear reset fields
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpires = undefined;
+
+    await user.save();
+
+    res.json({ message: "Password updated successfully" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
   }
 });
 

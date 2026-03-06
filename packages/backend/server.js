@@ -18,6 +18,7 @@ const userRoutes = require("./routes/users");
 const betslipRoutes = require("./routes/betslipRoutes");
 const accumulatorRoutes = require("./routes/accumulators");
 const aiRoutes = require("./routes/aiRoutes");
+const paymentRoutes = require("./routes/payment");
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -48,6 +49,7 @@ app.use("/api/admin", adminRoutes);
 app.use("/api/betslips", betslipRoutes);
 app.use("/api/accumulators", accumulatorRoutes);
 app.use("/api/ai", aiRoutes);
+app.use("/api/payment", paymentRoutes); // Payment routes
 
 // Auth & User Routes
 app.use("/api/auth", authRoutes);

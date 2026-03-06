@@ -1,4 +1,4 @@
-const BetSlip = require("../models/Betslip");
+const BetSlip = require("../models/BetSlip");
 const User = require("../models/User");
 
 /**

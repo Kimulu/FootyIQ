@@ -12,7 +12,6 @@ import {
   CardHeader,
 } from "@material-tailwind/react";
 import { Container } from "../layout/Container";
-import { Button } from "../ui/Button";
 
 const responsive = {
   desktop: {
@@ -46,6 +45,15 @@ export default function ArticleCarousel() {
     load();
   }, []);
 
+  // ── FIX: Common props to satisfy Material Tailwind TS requirements ──
+  const placeholderProps = {
+    placeholder: undefined,
+    onPointerEnterCapture: undefined,
+    onPointerLeaveCapture: undefined,
+    onResize: undefined,
+    onResizeCapture: undefined,
+  } as any;
+
   return (
     <section
       id="latest-news"
@@ -60,20 +68,20 @@ export default function ArticleCarousel() {
           autoPlaySpeed={4000}
           arrows={false}
           showDots={false}
-          // ADD THESE TWO PROPS:
-          itemClass="px-2 flex" // Adds spacing between cards and makes them flex items
+          itemClass="px-2 flex"
           containerClass="pb-5"
         >
           {articles.map((article) => (
             <Card
               key={article._id}
-              // REMOVED max-w-[300px], ADDED h-full and flex-col
               className="flex h-full flex-col overflow-hidden bg-[#101010] text-white shadow-lg"
+              {...placeholderProps} // <--- Fix applied here
             >
               <CardHeader
                 floated={false}
                 shadow={false}
-                className="m-0 rounded-none flex-shrink-0" // Prevents header from shrinking
+                className="m-0 rounded-none flex-shrink-0"
+                {...placeholderProps} // <--- Fix applied here
               >
                 <img
                   src={article.image || "/images/news-placeholder.jpg"}
@@ -82,17 +90,29 @@ export default function ArticleCarousel() {
                 />
               </CardHeader>
 
-              {/* flex-grow makes this section fill all available space */}
-              <CardBody className="flex-grow">
-                <Typography variant="h6" className="text-white line-clamp-2">
+              <CardBody
+                className="flex-grow"
+                {...placeholderProps} // <--- Fix applied here
+              >
+                <Typography
+                  variant="h6"
+                  className="text-white line-clamp-2"
+                  {...placeholderProps} // <--- Fix applied here
+                >
                   {article.title}
                 </Typography>
-                <Typography className="mt-2 text-sm text-white/80 line-clamp-3">
+                <Typography
+                  className="mt-2 text-sm text-white/80 line-clamp-3"
+                  {...placeholderProps} // <--- Fix applied here
+                >
                   {article.content}
                 </Typography>
               </CardBody>
 
-              <CardFooter className="flex items-center justify-between text-xs text-white/60 pt-0">
+              <CardFooter
+                className="flex items-center justify-between text-xs text-white/60 pt-0"
+                {...placeholderProps} // <--- Fix applied here
+              >
                 <span>
                   {new Date(article.publishedAt).toLocaleDateString()}
                 </span>
@@ -101,10 +121,6 @@ export default function ArticleCarousel() {
                   className="group relative inline-block transition-transform hover:scale-[1.02] active:scale-95"
                 >
                   <div
-                    // UPDATED DIMENSIONS:
-                    // h-[36px] (was 44)
-                    // min-w-[150px] (was 190)
-                    // text-[11px] (was 12)
                     className="relative flex h-[32px] min-w-[110px] items-center justify-center text-[9px] font-bold uppercase tracking-widest text-white shadow-lg"
                     style={{ clipPath: buttonShape }}
                   >
@@ -115,7 +131,6 @@ export default function ArticleCarousel() {
                     />
                     <span className="z-10 flex items-center gap-2 text-[#4ade80] drop-shadow-[0_0_8px_rgba(74,222,128,0.4)]">
                       Read More
-                      {/* Smaller chevron to match text size */}
                       <span className="text-[10px] font-bold">›</span>
                     </span>
                   </div>

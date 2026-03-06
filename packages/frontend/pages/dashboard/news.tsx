@@ -20,7 +20,6 @@ export default function NewsPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
 
-  // Polygon shape for the button (copied from your component)
   const buttonShape =
     "polygon(15px 0, 100% 0, calc(100% - 15px) 100%, 0% 100%)";
 
@@ -43,6 +42,13 @@ export default function NewsPage() {
   const filteredArticles = articles.filter((article) =>
     article.title.toLowerCase().includes(search.toLowerCase()),
   );
+
+  // ── FIX: Common props to satisfy Material Tailwind TS requirements ──
+  const placeholderProps = {
+    placeholder: undefined,
+    onPointerEnterCapture: undefined,
+    onPointerLeaveCapture: undefined,
+  } as any;
 
   return (
     <ProtectedRoute allowedRoles={["user", "admin"]}>
@@ -101,11 +107,13 @@ export default function NewsPage() {
               <Card
                 key={article._id}
                 className="flex flex-col overflow-hidden bg-[#101010] text-white shadow-lg border border-white/5 hover:border-white/10 transition-colors h-full"
+                {...placeholderProps} // <--- Fix applied
               >
                 <CardHeader
                   floated={false}
                   shadow={false}
                   className="m-0 rounded-none flex-shrink-0"
+                  {...placeholderProps} // <--- Fix applied
                 >
                   <div className="relative h-44 w-full overflow-hidden">
                     <img
@@ -118,19 +126,29 @@ export default function NewsPage() {
                   </div>
                 </CardHeader>
 
-                <CardBody className="flex-grow p-5">
+                <CardBody
+                  className="flex-grow p-5"
+                  {...placeholderProps} // <--- Fix applied
+                >
                   <Typography
                     variant="h6"
                     className="text-white font-bold leading-tight line-clamp-2 mb-3"
+                    {...placeholderProps} // <--- Fix applied
                   >
                     {article.title}
                   </Typography>
-                  <Typography className="text-sm text-white/60 line-clamp-3 font-normal">
+                  <Typography
+                    className="text-sm text-white/60 line-clamp-3 font-normal"
+                    {...placeholderProps} // <--- Fix applied
+                  >
                     {article.content}
                   </Typography>
                 </CardBody>
 
-                <CardFooter className="flex items-center justify-between p-5 pt-0 border-t border-white/5 mt-auto">
+                <CardFooter
+                  className="flex items-center justify-between p-5 pt-0 border-t border-white/5 mt-auto"
+                  {...placeholderProps} // <--- Fix applied
+                >
                   <span className="text-xs text-white/40 font-medium">
                     {new Date(article.publishedAt).toLocaleDateString(
                       undefined,

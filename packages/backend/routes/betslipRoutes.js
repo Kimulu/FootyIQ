@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const jwt = require("jsonwebtoken");
-const BetSlip = require("../models/Betslip");
+const BetSlip = require("../models/BetSlip");
 const User = require("../models/User");
 const Prediction = require("../models/Prediction");
 const { resolveBetsForMatch } = require("../services/betServices");
